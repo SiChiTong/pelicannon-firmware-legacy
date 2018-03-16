@@ -1,0 +1,8 @@
+Debug
+Release
+*.o
+
+.settings
+.project
+.cproject
+*.mex
