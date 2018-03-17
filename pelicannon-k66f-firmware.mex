@@ -77,12 +77,42 @@
                   </pin>
                   <pin peripheral="GPIOA" signal="GPIO, 29" pin_num="H11" pin_signal="PTA29/MII0_COL/FB_A24">
                      <pin_features>
+                        <pin_feature name="direction" value="INPUT"/>
                         <pin_feature name="pull_select" value="down"/>
                      </pin_features>
                   </pin>
-                  <pin peripheral="GPIOA" signal="GPIO, 28" pin_num="H12" pin_signal="PTA28/MII0_TXER/FB_A25"/>
-                  <pin peripheral="GPIOC" signal="GPIO, 17" pin_num="D5" pin_signal="PTC17/CAN1_TX/UART3_TX/ENET0_1588_TMR1/FB_CS4_b/FB_TSIZ0/FB_BE31_24_BLS7_0_b/SDRAM_DQM3"/>
-                  <pin peripheral="GPIOC" signal="GPIO, 13" pin_num="D6" pin_signal="PTC13/UART4_CTS_b/FTM_CLKIN1/FB_AD26/SDRAM_D26/TPM_CLKIN1"/>
+                  <pin peripheral="GPIOA" signal="GPIO, 28" pin_num="H12" pin_signal="PTA28/MII0_TXER/FB_A25">
+                     <pin_features>
+                        <pin_feature name="direction" value="INPUT"/>
+                     </pin_features>
+                  </pin>
+                  <pin peripheral="GPIOC" signal="GPIO, 17" pin_num="D5" pin_signal="PTC17/CAN1_TX/UART3_TX/ENET0_1588_TMR1/FB_CS4_b/FB_TSIZ0/FB_BE31_24_BLS7_0_b/SDRAM_DQM3">
+                     <pin_features>
+                        <pin_feature name="direction" value="INPUT"/>
+                     </pin_features>
+                  </pin>
+                  <pin peripheral="GPIOC" signal="GPIO, 13" pin_num="D6" pin_signal="PTC13/UART4_CTS_b/FTM_CLKIN1/FB_AD26/SDRAM_D26/TPM_CLKIN1">
+                     <pin_features>
+                        <pin_feature name="direction" value="INPUT"/>
+                     </pin_features>
+                  </pin>
+                  <pin peripheral="GPIOA" signal="GPIO, 27" pin_num="J10" pin_signal="PTA27/MII0_CRS/FB_A26">
+                     <pin_features>
+                        <pin_feature name="direction" value="OUTPUT"/>
+                     </pin_features>
+                  </pin>
+                  <pin peripheral="GPIOA" signal="GPIO, 26" pin_num="J11" pin_signal="PTA26/MII0_TXD3/FB_A27">
+                     <pin_features>
+                        <pin_feature name="direction" value="OUTPUT"/>
+                     </pin_features>
+                  </pin>
+                  <pin peripheral="GPIOA" signal="GPIO, 4" pin_num="L7" pin_signal="TSI0_CH5/PTA4/LLWU_P3/FTM0_CH1/NMI_b/EZP_CS_b">
+                     <pin_features>
+                        <pin_feature name="direction" value="OUTPUT"/>
+                        <pin_feature name="pull_select" value="down"/>
+                        <pin_feature name="pull_enable" value="disable"/>
+                     </pin_features>
+                  </pin>
                </pins>
             </function>
          </functions_list>

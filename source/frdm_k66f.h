@@ -8,7 +8,12 @@
 #include "gpio_driver.h"
 
 extern gpioHandleKSDK_t FXAS21002_INT1;
+extern gpioHandleKSDK_t FXAS21002_INT2;
 extern gpioHandleKSDK_t FXOS8700_INT1;
+extern gpioHandleKSDK_t FXOS8700_INT2;
+extern gpioHandleKSDK_t GPIO_DEBUG_1;
+extern gpioHandleKSDK_t GPIO_DEBUG_2;
+extern gpioHandleKSDK_t GPIO_DEBUG_3;
 
 uint32_t I2C0_GetFreq(void);
 void I2C0_InitPins(void);

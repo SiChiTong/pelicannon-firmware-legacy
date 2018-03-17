@@ -51,6 +51,8 @@
 /* CMSIS Includes */
 #include "Driver_I2C.h"
 #include "frdm_k66f.h"
+#include "core_cm4.h"
+
 
 /* ISSDK Includes */
 #include "issdk_hal.h"
@@ -62,7 +64,7 @@
 #include "pelicannon-k66f-firmware.h"
 
 /* Local Prototypes */
-static void ninedof_task(void *pvParameters);
+static void Ninedof_Task(void *pvParameters);
 void Sensors_Init();
 
 /* Synchronization Primitives */
@@ -114,11 +116,49 @@ const registerreadlist_t fxas21002_Read[] = {
 
 /* ISR Routines */
 void FXAS21002_ISR(void *pUserData){
-	xEventGroupSetBits(ninedof_event_group, EVENT_G);
+    BaseType_t xHigherPriorityTaskWoken, xResult;
+
+    GENERIC_DRIVER_GPIO *gpioDriver = &Driver_GPIO_KSDK;
+
+    gpioDriver->write_pin(&GPIO_DEBUG_2, 1);
+
+    xHigherPriorityTaskWoken = pdFALSE;
+
+    xResult = xEventGroupSetBitsFromISR(ninedof_event_group, EVENT_G, &xHigherPriorityTaskWoken);
+    if( xResult != pdFAIL )
+      {
+          /* If xHigherPriorityTaskWoken is now set to pdTRUE then a context
+          switch should be requested.  The macro used is port specific and will
+          be either portYIELD_FROM_ISR() or portEND_SWITCHING_ISR() - refer to
+          the documentation page for the port being used. */
+          portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+      }
+
+    gpioDriver->write_pin(&GPIO_DEBUG_2, 0);
+
 }
 
 void FXOS8700_ISR(void *pUserData){
-	xEventGroupSetBits(ninedof_event_group, EVENT_XM);
+    BaseType_t xHigherPriorityTaskWoken, xResult;
+
+    GENERIC_DRIVER_GPIO *gpioDriver = &Driver_GPIO_KSDK;
+
+    gpioDriver->write_pin(&GPIO_DEBUG_3, 1);
+
+    xHigherPriorityTaskWoken = pdFALSE;
+
+    xResult = xEventGroupSetBitsFromISR(ninedof_event_group, EVENT_XM, &xHigherPriorityTaskWoken);
+    if( xResult != pdFAIL )
+      {
+          /* If xHigherPriorityTaskWoken is now set to pdTRUE then a context
+          switch should be requested.  The macro used is port specific and will
+          be either portYIELD_FROM_ISR() or portEND_SWITCHING_ISR() - refer to
+          the documentation page for the port being used. */
+          portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+      }
+
+    gpioDriver->write_pin(&GPIO_DEBUG_3, 0);
+
 }
 
 
@@ -134,32 +174,36 @@ int main(void) {
   	/* Init FSL debug console. */
     BOARD_InitDebugConsole();
 
+    /* Lower ISR priorities to below FreeRTOS task level */
+    NVIC_SetPriority(PORTA_IRQn, 0x02);
+    NVIC_SetPriority(PORTC_IRQn, 0x02);
+
     /* Initialize Synchronization Primitives */
     ninedof_event_group = xEventGroupCreate();
 
-    /* Setup Interupts */
-    GENERIC_DRIVER_GPIO *gpioDriver = &Driver_GPIO_KSDK;
-
-    gpioDriver->pin_init(&FXAS21002_INT1, GPIO_DIRECTION_IN, NULL, &FXAS21002_ISR, NULL);
-    gpioDriver->pin_init(&FXOS8700_INT2, GPIO_DIRECTION_IN, NULL, &FXOS8700_ISR, NULL);
-
-    //Configure I2C and Mag/Accel/Gyro
-    Sensors_Init();
-
     /* Create tasks */
-    if (xTaskCreate(ninedof_task, "ninedof_task", 1024, 0, configMAX_PRIORITIES-1, 0) != pdPASS){
+    if (xTaskCreate(Ninedof_Task, "ninedof_task", 1024, 0, configMAX_PRIORITIES-1, 0) != pdPASS){
     	PRINTF("\r\n Failed to create ninedof_task\r\n");
     	while(1);
     }
 
     vTaskStartScheduler();
-    for (;;);
+    for (;;)
+    	;
 }
 
 void Sensors_Init(){
     int32_t status;
 
+    /* Setup Interupts */
+    GENERIC_DRIVER_GPIO *gpioDriver = &Driver_GPIO_KSDK;
 
+    gpioDriver->pin_init(&GPIO_DEBUG_1, GPIO_DIRECTION_OUT, NULL, NULL, NULL);
+    gpioDriver->pin_init(&GPIO_DEBUG_2, GPIO_DIRECTION_OUT, NULL, NULL, NULL);
+    gpioDriver->pin_init(&GPIO_DEBUG_3, GPIO_DIRECTION_OUT, NULL, NULL, NULL);
+
+    gpioDriver->pin_init(&FXAS21002_INT1, GPIO_DIRECTION_IN, NULL, &FXAS21002_ISR, NULL);
+    gpioDriver->pin_init(&FXOS8700_INT2, GPIO_DIRECTION_IN, NULL, &FXOS8700_ISR, NULL);
 
     /*! Initialize the I2C driver. */
     status = I2Cdrv->Initialize(I2C0_SignalEvent_t);
@@ -219,11 +263,16 @@ void Sensors_Init(){
         return;
     }
 
+
     PRINTF("\r\n Succesfully initialized sensors!\r\n");
 
 }
 
-static void ninedof_task(void *pvParameters){
+
+static void Ninedof_Task(void *pvParameters){
+
+	uint32_t flag_xm, flag_g;
+
     int32_t status;
 
     EventBits_t event_set;
@@ -235,16 +284,24 @@ static void ninedof_task(void *pvParameters){
     fxas21002_gyrodata_t data_G;
     fxos8700_accelmagdata_t data_XM;
 
-    uint32_t flag_xm, flag_g;
+    //Configure I2C and Mag/Accel/Gyro
+    Sensors_Init();
+
+    GENERIC_DRIVER_GPIO *gpioDriver = &Driver_GPIO_KSDK;
+
+
+
     flag_xm = 0; flag_g = 0;
     for(;;){
 
     	if (flag_xm && flag_g){
+    	    gpioDriver->write_pin(&GPIO_DEBUG_1, 1);
+
     		flag_xm = 0;
     		flag_g = 0;
     		event_wait_for = EVENT_XM | EVENT_G;
 
-    		printf("\r\n Woot!\r\n");
+    		gpioDriver->write_pin(&GPIO_DEBUG_1, 0);
     	} else if(flag_xm){
     		event_wait_for = EVENT_G;
     	} else if(flag_g){
@@ -255,9 +312,10 @@ static void ninedof_task(void *pvParameters){
 										 event_wait_for,
 										 pdTRUE,
 										 pdFALSE,
-										 portMAX_DELAY);
+										 0xFFFFFFFF);
 
-		if (event_set & EVENT_XM){
+
+		if (event_set & EVENT_XM || gpioDriver->read_pin(&FXOS8700_INT2)){
 			flag_xm = 1;
 
 	        /*! Read the raw sensor data from the fxos8700. */
@@ -265,7 +323,7 @@ static void ninedof_task(void *pvParameters){
 	        if (ARM_DRIVER_OK != status)
 	        {
 	            PRINTF("\r\n FXOS8700 Read Failed. \r\n");
-	            return -1;
+	            return;
 	        }
 
 	        /*! Convert the raw sensor data to signed 16-bit container for display to the debug port. */
@@ -281,7 +339,7 @@ static void ninedof_task(void *pvParameters){
 	        data_XM.accel[2] /= 4;
 		}
 
-		if (event_set & EVENT_G){
+		if (event_set & EVENT_G || gpioDriver->read_pin(&FXAS21002_INT1)){
 			flag_g = 1;
 
 	        /*! Read the raw sensor data from the FXAS21002. */

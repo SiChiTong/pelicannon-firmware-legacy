@@ -63,59 +63,108 @@ void BOARD_InitBootPins(void);
 
 /*! @name PORTA29 (coord H11), U19[3]/FXAS21002_INT1
   @{ */
-#define BOARD_INITPINS_GYRO_INT1_PERIPHERAL GPIOA              /*!<@brief Device name: GPIOA */
-#define BOARD_INITPINS_GYRO_INT1_SIGNAL GPIO                   /*!<@brief GPIOA signal: GPIO */
-#define BOARD_INITPINS_GYRO_INT1_GPIO GPIOA                    /*!<@brief GPIO device name: GPIOA */
-#define BOARD_INITPINS_GYRO_INT1_GPIO_PIN 29U                  /*!<@brief PORTA pin index: 29 */
-#define BOARD_INITPINS_GYRO_INT1_PORT PORTA                    /*!<@brief PORT device name: PORTA */
-#define BOARD_INITPINS_GYRO_INT1_PIN 29U                       /*!<@brief PORTA pin index: 29 */
-#define BOARD_INITPINS_GYRO_INT1_CHANNEL 29                    /*!<@brief GPIOA GPIO channel: 29 */
-#define BOARD_INITPINS_GYRO_INT1_PIN_NAME PTA29                /*!<@brief Pin name */
-#define BOARD_INITPINS_GYRO_INT1_LABEL "U19[3]/FXAS21002_INT1" /*!<@brief Label */
-#define BOARD_INITPINS_GYRO_INT1_NAME "GYRO_INT1"              /*!<@brief Identifier name */
-                                                               /* @} */
+#define BOARD_INITPINS_GYRO_INT1_PERIPHERAL GPIOA                  /*!<@brief Device name: GPIOA */
+#define BOARD_INITPINS_GYRO_INT1_SIGNAL GPIO                       /*!<@brief GPIOA signal: GPIO */
+#define BOARD_INITPINS_GYRO_INT1_GPIO GPIOA                        /*!<@brief GPIO device name: GPIOA */
+#define BOARD_INITPINS_GYRO_INT1_GPIO_PIN 29U                      /*!<@brief PORTA pin index: 29 */
+#define BOARD_INITPINS_GYRO_INT1_PORT PORTA                        /*!<@brief PORT device name: PORTA */
+#define BOARD_INITPINS_GYRO_INT1_PIN 29U                           /*!<@brief PORTA pin index: 29 */
+#define BOARD_INITPINS_GYRO_INT1_CHANNEL 29                        /*!<@brief GPIOA GPIO channel: 29 */
+#define BOARD_INITPINS_GYRO_INT1_PIN_NAME PTA29                    /*!<@brief Pin name */
+#define BOARD_INITPINS_GYRO_INT1_LABEL "U19[3]/FXAS21002_INT1"     /*!<@brief Label */
+#define BOARD_INITPINS_GYRO_INT1_NAME "GYRO_INT1"                  /*!<@brief Identifier name */
+#define BOARD_INITPINS_GYRO_INT1_DIRECTION kPIN_MUX_DirectionInput /*!<@brief Direction */
+                                                                   /* @} */
 
 /*! @name PORTA28 (coord H12), U19[2]/FXAS21002_INT2
   @{ */
-#define BOARD_INITPINS_GYRO_INT2_PERIPHERAL GPIOA              /*!<@brief Device name: GPIOA */
-#define BOARD_INITPINS_GYRO_INT2_SIGNAL GPIO                   /*!<@brief GPIOA signal: GPIO */
-#define BOARD_INITPINS_GYRO_INT2_GPIO GPIOA                    /*!<@brief GPIO device name: GPIOA */
-#define BOARD_INITPINS_GYRO_INT2_GPIO_PIN 28U                  /*!<@brief PORTA pin index: 28 */
-#define BOARD_INITPINS_GYRO_INT2_PORT PORTA                    /*!<@brief PORT device name: PORTA */
-#define BOARD_INITPINS_GYRO_INT2_PIN 28U                       /*!<@brief PORTA pin index: 28 */
-#define BOARD_INITPINS_GYRO_INT2_CHANNEL 28                    /*!<@brief GPIOA GPIO channel: 28 */
-#define BOARD_INITPINS_GYRO_INT2_PIN_NAME PTA28                /*!<@brief Pin name */
-#define BOARD_INITPINS_GYRO_INT2_LABEL "U19[2]/FXAS21002_INT2" /*!<@brief Label */
-#define BOARD_INITPINS_GYRO_INT2_NAME "GYRO_INT2"              /*!<@brief Identifier name */
-                                                               /* @} */
+#define BOARD_INITPINS_GYRO_INT2_PERIPHERAL GPIOA                  /*!<@brief Device name: GPIOA */
+#define BOARD_INITPINS_GYRO_INT2_SIGNAL GPIO                       /*!<@brief GPIOA signal: GPIO */
+#define BOARD_INITPINS_GYRO_INT2_GPIO GPIOA                        /*!<@brief GPIO device name: GPIOA */
+#define BOARD_INITPINS_GYRO_INT2_GPIO_PIN 28U                      /*!<@brief PORTA pin index: 28 */
+#define BOARD_INITPINS_GYRO_INT2_PORT PORTA                        /*!<@brief PORT device name: PORTA */
+#define BOARD_INITPINS_GYRO_INT2_PIN 28U                           /*!<@brief PORTA pin index: 28 */
+#define BOARD_INITPINS_GYRO_INT2_CHANNEL 28                        /*!<@brief GPIOA GPIO channel: 28 */
+#define BOARD_INITPINS_GYRO_INT2_PIN_NAME PTA28                    /*!<@brief Pin name */
+#define BOARD_INITPINS_GYRO_INT2_LABEL "U19[2]/FXAS21002_INT2"     /*!<@brief Label */
+#define BOARD_INITPINS_GYRO_INT2_NAME "GYRO_INT2"                  /*!<@brief Identifier name */
+#define BOARD_INITPINS_GYRO_INT2_DIRECTION kPIN_MUX_DirectionInput /*!<@brief Direction */
+                                                                   /* @} */
 
 /*! @name PORTC17 (coord D5), U8[11]/FXOS8700CQ_INT1
   @{ */
-#define BOARD_INITPINS_ACCEL_INT1_PERIPHERAL GPIOC               /*!<@brief Device name: GPIOC */
-#define BOARD_INITPINS_ACCEL_INT1_SIGNAL GPIO                    /*!<@brief GPIOC signal: GPIO */
-#define BOARD_INITPINS_ACCEL_INT1_GPIO GPIOC                     /*!<@brief GPIO device name: GPIOC */
-#define BOARD_INITPINS_ACCEL_INT1_GPIO_PIN 17U                   /*!<@brief PORTC pin index: 17 */
-#define BOARD_INITPINS_ACCEL_INT1_PORT PORTC                     /*!<@brief PORT device name: PORTC */
-#define BOARD_INITPINS_ACCEL_INT1_PIN 17U                        /*!<@brief PORTC pin index: 17 */
-#define BOARD_INITPINS_ACCEL_INT1_CHANNEL 17                     /*!<@brief GPIOC GPIO channel: 17 */
-#define BOARD_INITPINS_ACCEL_INT1_PIN_NAME PTC17                 /*!<@brief Pin name */
-#define BOARD_INITPINS_ACCEL_INT1_LABEL "U8[11]/FXOS8700CQ_INT1" /*!<@brief Label */
-#define BOARD_INITPINS_ACCEL_INT1_NAME "ACCEL_INT1"              /*!<@brief Identifier name */
-                                                                 /* @} */
+#define BOARD_INITPINS_ACCEL_INT1_PERIPHERAL GPIOC                  /*!<@brief Device name: GPIOC */
+#define BOARD_INITPINS_ACCEL_INT1_SIGNAL GPIO                       /*!<@brief GPIOC signal: GPIO */
+#define BOARD_INITPINS_ACCEL_INT1_GPIO GPIOC                        /*!<@brief GPIO device name: GPIOC */
+#define BOARD_INITPINS_ACCEL_INT1_GPIO_PIN 17U                      /*!<@brief PORTC pin index: 17 */
+#define BOARD_INITPINS_ACCEL_INT1_PORT PORTC                        /*!<@brief PORT device name: PORTC */
+#define BOARD_INITPINS_ACCEL_INT1_PIN 17U                           /*!<@brief PORTC pin index: 17 */
+#define BOARD_INITPINS_ACCEL_INT1_CHANNEL 17                        /*!<@brief GPIOC GPIO channel: 17 */
+#define BOARD_INITPINS_ACCEL_INT1_PIN_NAME PTC17                    /*!<@brief Pin name */
+#define BOARD_INITPINS_ACCEL_INT1_LABEL "U8[11]/FXOS8700CQ_INT1"    /*!<@brief Label */
+#define BOARD_INITPINS_ACCEL_INT1_NAME "ACCEL_INT1"                 /*!<@brief Identifier name */
+#define BOARD_INITPINS_ACCEL_INT1_DIRECTION kPIN_MUX_DirectionInput /*!<@brief Direction */
+                                                                    /* @} */
 
 /*! @name PORTC13 (coord D6), U8[9]/FXOS8700CQ_INT2
   @{ */
-#define BOARD_INITPINS_ACCEL_INT2_PERIPHERAL GPIOC              /*!<@brief Device name: GPIOC */
-#define BOARD_INITPINS_ACCEL_INT2_SIGNAL GPIO                   /*!<@brief GPIOC signal: GPIO */
-#define BOARD_INITPINS_ACCEL_INT2_GPIO GPIOC                    /*!<@brief GPIO device name: GPIOC */
-#define BOARD_INITPINS_ACCEL_INT2_GPIO_PIN 13U                  /*!<@brief PORTC pin index: 13 */
-#define BOARD_INITPINS_ACCEL_INT2_PORT PORTC                    /*!<@brief PORT device name: PORTC */
-#define BOARD_INITPINS_ACCEL_INT2_PIN 13U                       /*!<@brief PORTC pin index: 13 */
-#define BOARD_INITPINS_ACCEL_INT2_CHANNEL 13                    /*!<@brief GPIOC GPIO channel: 13 */
-#define BOARD_INITPINS_ACCEL_INT2_PIN_NAME PTC13                /*!<@brief Pin name */
-#define BOARD_INITPINS_ACCEL_INT2_LABEL "U8[9]/FXOS8700CQ_INT2" /*!<@brief Label */
-#define BOARD_INITPINS_ACCEL_INT2_NAME "ACCEL_INT2"             /*!<@brief Identifier name */
-                                                                /* @} */
+#define BOARD_INITPINS_ACCEL_INT2_PERIPHERAL GPIOC                  /*!<@brief Device name: GPIOC */
+#define BOARD_INITPINS_ACCEL_INT2_SIGNAL GPIO                       /*!<@brief GPIOC signal: GPIO */
+#define BOARD_INITPINS_ACCEL_INT2_GPIO GPIOC                        /*!<@brief GPIO device name: GPIOC */
+#define BOARD_INITPINS_ACCEL_INT2_GPIO_PIN 13U                      /*!<@brief PORTC pin index: 13 */
+#define BOARD_INITPINS_ACCEL_INT2_PORT PORTC                        /*!<@brief PORT device name: PORTC */
+#define BOARD_INITPINS_ACCEL_INT2_PIN 13U                           /*!<@brief PORTC pin index: 13 */
+#define BOARD_INITPINS_ACCEL_INT2_CHANNEL 13                        /*!<@brief GPIOC GPIO channel: 13 */
+#define BOARD_INITPINS_ACCEL_INT2_PIN_NAME PTC13                    /*!<@brief Pin name */
+#define BOARD_INITPINS_ACCEL_INT2_LABEL "U8[9]/FXOS8700CQ_INT2"     /*!<@brief Label */
+#define BOARD_INITPINS_ACCEL_INT2_NAME "ACCEL_INT2"                 /*!<@brief Identifier name */
+#define BOARD_INITPINS_ACCEL_INT2_DIRECTION kPIN_MUX_DirectionInput /*!<@brief Direction */
+                                                                    /* @} */
+
+/*! @name PORTA27 (coord J10), J3[1]/FB_A26
+  @{ */
+#define BOARD_INITPINS_FB_A26_PERIPHERAL GPIOA                   /*!<@brief Device name: GPIOA */
+#define BOARD_INITPINS_FB_A26_SIGNAL GPIO                        /*!<@brief GPIOA signal: GPIO */
+#define BOARD_INITPINS_FB_A26_GPIO GPIOA                         /*!<@brief GPIO device name: GPIOA */
+#define BOARD_INITPINS_FB_A26_GPIO_PIN 27U                       /*!<@brief PORTA pin index: 27 */
+#define BOARD_INITPINS_FB_A26_PORT PORTA                         /*!<@brief PORT device name: PORTA */
+#define BOARD_INITPINS_FB_A26_PIN 27U                            /*!<@brief PORTA pin index: 27 */
+#define BOARD_INITPINS_FB_A26_CHANNEL 27                         /*!<@brief GPIOA GPIO channel: 27 */
+#define BOARD_INITPINS_FB_A26_PIN_NAME PTA27                     /*!<@brief Pin name */
+#define BOARD_INITPINS_FB_A26_LABEL "J3[1]/FB_A26"               /*!<@brief Label */
+#define BOARD_INITPINS_FB_A26_NAME "FB_A26"                      /*!<@brief Identifier name */
+#define BOARD_INITPINS_FB_A26_DIRECTION kPIN_MUX_DirectionOutput /*!<@brief Direction */
+                                                                 /* @} */
+
+/*! @name PORTA26 (coord J11), J3[3]/FB_A27
+  @{ */
+#define BOARD_INITPINS_FB_A27_PERIPHERAL GPIOA                   /*!<@brief Device name: GPIOA */
+#define BOARD_INITPINS_FB_A27_SIGNAL GPIO                        /*!<@brief GPIOA signal: GPIO */
+#define BOARD_INITPINS_FB_A27_GPIO GPIOA                         /*!<@brief GPIO device name: GPIOA */
+#define BOARD_INITPINS_FB_A27_GPIO_PIN 26U                       /*!<@brief PORTA pin index: 26 */
+#define BOARD_INITPINS_FB_A27_PORT PORTA                         /*!<@brief PORT device name: PORTA */
+#define BOARD_INITPINS_FB_A27_PIN 26U                            /*!<@brief PORTA pin index: 26 */
+#define BOARD_INITPINS_FB_A27_CHANNEL 26                         /*!<@brief GPIOA GPIO channel: 26 */
+#define BOARD_INITPINS_FB_A27_PIN_NAME PTA26                     /*!<@brief Pin name */
+#define BOARD_INITPINS_FB_A27_LABEL "J3[3]/FB_A27"               /*!<@brief Label */
+#define BOARD_INITPINS_FB_A27_NAME "FB_A27"                      /*!<@brief Identifier name */
+#define BOARD_INITPINS_FB_A27_DIRECTION kPIN_MUX_DirectionOutput /*!<@brief Direction */
+                                                                 /* @} */
+
+/*! @name PORTA4 (coord L7), J3[5]/LLWU_P3/FTM0_CH1/NMI
+  @{ */
+#define BOARD_INITPINS_NMI_PERIPHERAL GPIOA                   /*!<@brief Device name: GPIOA */
+#define BOARD_INITPINS_NMI_SIGNAL GPIO                        /*!<@brief GPIOA signal: GPIO */
+#define BOARD_INITPINS_NMI_GPIO GPIOA                         /*!<@brief GPIO device name: GPIOA */
+#define BOARD_INITPINS_NMI_GPIO_PIN 4U                        /*!<@brief PORTA pin index: 4 */
+#define BOARD_INITPINS_NMI_PORT PORTA                         /*!<@brief PORT device name: PORTA */
+#define BOARD_INITPINS_NMI_PIN 4U                             /*!<@brief PORTA pin index: 4 */
+#define BOARD_INITPINS_NMI_CHANNEL 4                          /*!<@brief GPIOA GPIO channel: 4 */
+#define BOARD_INITPINS_NMI_PIN_NAME PTA4                      /*!<@brief Pin name */
+#define BOARD_INITPINS_NMI_LABEL "J3[5]/LLWU_P3/FTM0_CH1/NMI" /*!<@brief Label */
+#define BOARD_INITPINS_NMI_NAME "NMI"                         /*!<@brief Identifier name */
+#define BOARD_INITPINS_NMI_DIRECTION kPIN_MUX_DirectionOutput /*!<@brief Direction */
+                                                              /* @} */
 
 /*!
  * @brief Configures pin routing and optionally pin electrical features.
