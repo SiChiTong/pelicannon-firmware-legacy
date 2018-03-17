@@ -40,15 +40,6 @@ BOARD_InitPins:
 - pin_list:
   - {pin_num: E10, peripheral: UART0, signal: RX, pin_signal: TSI0_CH9/PTB16/SPI1_SOUT/UART0_RX/FTM_CLKIN0/FB_AD17/SDRAM_D17/EWM_IN/TPM_CLKIN0}
   - {pin_num: E9, peripheral: UART0, signal: TX, pin_signal: TSI0_CH10/PTB17/SPI1_SIN/UART0_TX/FTM_CLKIN1/FB_AD16/SDRAM_D16/EWM_OUT_b/TPM_CLKIN1}
-  - {pin_num: C9, peripheral: I2C0, signal: SCL, pin_signal: PTD8/LLWU_P24/I2C0_SCL/LPUART0_RX/FB_A16, open_drain: enable, pull_select: up, pull_enable: enable}
-  - {pin_num: B9, peripheral: I2C0, signal: SDA, pin_signal: PTD9/I2C0_SDA/LPUART0_TX/FB_A17, open_drain: enable, pull_select: up, pull_enable: enable}
-  - {pin_num: H11, peripheral: GPIOA, signal: 'GPIO, 29', pin_signal: PTA29/MII0_COL/FB_A24, direction: INPUT, pull_select: down}
-  - {pin_num: H12, peripheral: GPIOA, signal: 'GPIO, 28', pin_signal: PTA28/MII0_TXER/FB_A25, direction: INPUT}
-  - {pin_num: D5, peripheral: GPIOC, signal: 'GPIO, 17', pin_signal: PTC17/CAN1_TX/UART3_TX/ENET0_1588_TMR1/FB_CS4_b/FB_TSIZ0/FB_BE31_24_BLS7_0_b/SDRAM_DQM3, direction: INPUT}
-  - {pin_num: D6, peripheral: GPIOC, signal: 'GPIO, 13', pin_signal: PTC13/UART4_CTS_b/FTM_CLKIN1/FB_AD26/SDRAM_D26/TPM_CLKIN1, direction: INPUT}
-  - {pin_num: J10, peripheral: GPIOA, signal: 'GPIO, 27', pin_signal: PTA27/MII0_CRS/FB_A26, direction: OUTPUT}
-  - {pin_num: J11, peripheral: GPIOA, signal: 'GPIO, 26', pin_signal: PTA26/MII0_TXD3/FB_A27, direction: OUTPUT}
-  - {pin_num: L7, peripheral: GPIOA, signal: 'GPIO, 4', pin_signal: TSI0_CH5/PTA4/LLWU_P3/FTM0_CH1/NMI_b/EZP_CS_b, direction: OUTPUT, pull_select: down, pull_enable: disable}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -61,48 +52,8 @@ BOARD_InitPins:
  * END ****************************************************************************************************************/
 void BOARD_InitPins(void)
 {
-    /* Port A Clock Gate Control: Clock enabled */
-    CLOCK_EnableClock(kCLOCK_PortA);
     /* Port B Clock Gate Control: Clock enabled */
     CLOCK_EnableClock(kCLOCK_PortB);
-    /* Port C Clock Gate Control: Clock enabled */
-    CLOCK_EnableClock(kCLOCK_PortC);
-    /* Port D Clock Gate Control: Clock enabled */
-    CLOCK_EnableClock(kCLOCK_PortD);
-
-    /* PORTA26 (pin J11) is configured as PTA26 */
-    PORT_SetPinMux(BOARD_INITPINS_FB_A27_PORT, BOARD_INITPINS_FB_A27_PIN, kPORT_MuxAsGpio);
-
-    /* PORTA27 (pin J10) is configured as PTA27 */
-    PORT_SetPinMux(BOARD_INITPINS_FB_A26_PORT, BOARD_INITPINS_FB_A26_PIN, kPORT_MuxAsGpio);
-
-    /* PORTA28 (pin H12) is configured as PTA28 */
-    PORT_SetPinMux(BOARD_INITPINS_GYRO_INT2_PORT, BOARD_INITPINS_GYRO_INT2_PIN, kPORT_MuxAsGpio);
-
-    /* PORTA29 (pin H11) is configured as PTA29 */
-    PORT_SetPinMux(BOARD_INITPINS_GYRO_INT1_PORT, BOARD_INITPINS_GYRO_INT1_PIN, kPORT_MuxAsGpio);
-
-    PORTA->PCR[29] = ((PORTA->PCR[29] &
-                       /* Mask bits to zero which are setting */
-                       (~(PORT_PCR_PS_MASK | PORT_PCR_ISF_MASK)))
-
-                      /* Pull Select: Internal pulldown resistor is enabled on the corresponding pin, if the
-                       * corresponding PE field is set. */
-                      | PORT_PCR_PS(kPORT_PullDown));
-
-    /* PORTA4 (pin L7) is configured as PTA4 */
-    PORT_SetPinMux(BOARD_INITPINS_NMI_PORT, BOARD_INITPINS_NMI_PIN, kPORT_MuxAsGpio);
-
-    PORTA->PCR[4] = ((PORTA->PCR[4] &
-                      /* Mask bits to zero which are setting */
-                      (~(PORT_PCR_PS_MASK | PORT_PCR_PE_MASK | PORT_PCR_ISF_MASK)))
-
-                     /* Pull Select: Internal pulldown resistor is enabled on the corresponding pin, if the
-                      * corresponding PE field is set. */
-                     | PORT_PCR_PS(kPORT_PullDown)
-
-                     /* Pull Enable: Internal pullup or pulldown resistor is not enabled on the corresponding pin. */
-                     | PORT_PCR_PE(kPORT_PullDisable));
 
     /* PORTB16 (pin E10) is configured as UART0_RX */
     PORT_SetPinMux(BOARD_INITPINS_DEBUG_UART_RX_PORT, BOARD_INITPINS_DEBUG_UART_RX_PIN, kPORT_MuxAlt3);
@@ -110,11 +61,56 @@ void BOARD_InitPins(void)
     /* PORTB17 (pin E9) is configured as UART0_TX */
     PORT_SetPinMux(BOARD_INITPINS_DEBUG_UART_TX_PORT, BOARD_INITPINS_DEBUG_UART_TX_PIN, kPORT_MuxAlt3);
 
+    SIM->SOPT5 = ((SIM->SOPT5 &
+                   /* Mask bits to zero which are setting */
+                   (~(SIM_SOPT5_UART0TXSRC_MASK)))
+
+                  /* UART 0 transmit data source select: UART0_TX pin. */
+                  | SIM_SOPT5_UART0TXSRC(SOPT5_UART0TXSRC_UART_TX));
+}
+
+/* clang-format off */
+/*
+ * TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+NineDoF_InitPins:
+- options: {callFromInitBoot: 'false', coreID: core0, enableClock: 'true'}
+- pin_list:
+  - {pin_num: C9, peripheral: I2C0, signal: SCL, pin_signal: PTD8/LLWU_P24/I2C0_SCL/LPUART0_RX/FB_A16, open_drain: enable, pull_select: up, pull_enable: enable}
+  - {pin_num: B9, peripheral: I2C0, signal: SDA, pin_signal: PTD9/I2C0_SDA/LPUART0_TX/FB_A17, open_drain: enable, pull_select: up, pull_enable: enable}
+  - {pin_num: H11, peripheral: GPIOA, signal: 'GPIO, 29', pin_signal: PTA29/MII0_COL/FB_A24}
+  - {pin_num: H12, peripheral: GPIOA, signal: 'GPIO, 28', pin_signal: PTA28/MII0_TXER/FB_A25}
+  - {pin_num: D5, peripheral: GPIOC, signal: 'GPIO, 17', pin_signal: PTC17/CAN1_TX/UART3_TX/ENET0_1588_TMR1/FB_CS4_b/FB_TSIZ0/FB_BE31_24_BLS7_0_b/SDRAM_DQM3}
+  - {pin_num: D6, peripheral: GPIOC, signal: 'GPIO, 13', pin_signal: PTC13/UART4_CTS_b/FTM_CLKIN1/FB_AD26/SDRAM_D26/TPM_CLKIN1}
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
+ */
+/* clang-format on */
+
+/* FUNCTION ************************************************************************************************************
+ *
+ * Function Name : NineDoF_InitPins
+ * Description   : Configures pin routing and optionally pin electrical features.
+ *
+ * END ****************************************************************************************************************/
+void NineDoF_InitPins(void)
+{
+    /* Port A Clock Gate Control: Clock enabled */
+    CLOCK_EnableClock(kCLOCK_PortA);
+    /* Port C Clock Gate Control: Clock enabled */
+    CLOCK_EnableClock(kCLOCK_PortC);
+    /* Port D Clock Gate Control: Clock enabled */
+    CLOCK_EnableClock(kCLOCK_PortD);
+
+    /* PORTA28 (pin H12) is configured as PTA28 */
+    PORT_SetPinMux(NINEDOF_INITPINS_GYRO_INT2_PORT, NINEDOF_INITPINS_GYRO_INT2_PIN, kPORT_MuxAsGpio);
+
+    /* PORTA29 (pin H11) is configured as PTA29 */
+    PORT_SetPinMux(NINEDOF_INITPINS_GYRO_INT1_PORT, NINEDOF_INITPINS_GYRO_INT1_PIN, kPORT_MuxAsGpio);
+
     /* PORTC13 (pin D6) is configured as PTC13 */
-    PORT_SetPinMux(BOARD_INITPINS_ACCEL_INT2_PORT, BOARD_INITPINS_ACCEL_INT2_PIN, kPORT_MuxAsGpio);
+    PORT_SetPinMux(NINEDOF_INITPINS_ACCEL_INT2_PORT, NINEDOF_INITPINS_ACCEL_INT2_PIN, kPORT_MuxAsGpio);
 
     /* PORTC17 (pin D5) is configured as PTC17 */
-    PORT_SetPinMux(BOARD_INITPINS_ACCEL_INT1_PORT, BOARD_INITPINS_ACCEL_INT1_PIN, kPORT_MuxAsGpio);
+    PORT_SetPinMux(NINEDOF_INITPINS_ACCEL_INT1_PORT, NINEDOF_INITPINS_ACCEL_INT1_PIN, kPORT_MuxAsGpio);
 
     /* PORTD8 (pin C9) is configured as I2C0_SCL */
     PORT_SetPinMux(PORTD, 8U, kPORT_MuxAlt2);
@@ -145,13 +141,84 @@ void BOARD_InitPins(void)
                      /* Open Drain Enable: Open drain output is enabled on the corresponding pin, if the pin is
                       * configured as a digital output. */
                      | PORT_PCR_ODE(kPORT_OpenDrainEnable));
+}
+
+/* clang-format off */
+/*
+ * TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+JetsonTK1_InitPins:
+- options: {callFromInitBoot: 'false', coreID: core0, enableClock: 'true'}
+- pin_list:
+  - {pin_num: A11, peripheral: UART1, signal: RX, pin_signal: CMP1_IN1/PTC3/LLWU_P7/SPI0_PCS1/UART1_RX/FTM0_CH2/CLKOUT/I2S0_TX_BCLK}
+  - {pin_num: A9, peripheral: UART1, signal: TX, pin_signal: PTC4/LLWU_P8/SPI0_PCS0/UART1_TX/FTM0_CH3/FB_AD11/SDRAM_A19/CMP1_OUT, direction: OUTPUT}
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
+ */
+/* clang-format on */
+
+/* FUNCTION ************************************************************************************************************
+ *
+ * Function Name : JetsonTK1_InitPins
+ * Description   : Configures pin routing and optionally pin electrical features.
+ *
+ * END ****************************************************************************************************************/
+void JetsonTK1_InitPins(void)
+{
+    /* Port C Clock Gate Control: Clock enabled */
+    CLOCK_EnableClock(kCLOCK_PortC);
+
+    /* PORTC3 (pin A11) is configured as UART1_RX */
+    PORT_SetPinMux(JETSONTK1_INITPINS_UART1_RX_PORT, JETSONTK1_INITPINS_UART1_RX_PIN, kPORT_MuxAlt3);
+
+    /* PORTC4 (pin A9) is configured as UART1_TX */
+    PORT_SetPinMux(JETSONTK1_INITPINS_UART1_TX_PORT, JETSONTK1_INITPINS_UART1_TX_PIN, kPORT_MuxAlt3);
 
     SIM->SOPT5 = ((SIM->SOPT5 &
                    /* Mask bits to zero which are setting */
-                   (~(SIM_SOPT5_UART0TXSRC_MASK)))
+                   (~(SIM_SOPT5_UART1TXSRC_MASK)))
 
-                  /* UART 0 transmit data source select: UART0_TX pin. */
-                  | SIM_SOPT5_UART0TXSRC(SOPT5_UART0TXSRC_UART_TX));
+                  /* UART 1 transmit data source select: UART1_TX pin. */
+                  | SIM_SOPT5_UART1TXSRC(SOPT5_UART1TXSRC_UART_TX));
+}
+
+/* clang-format off */
+/*
+ * TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+DualHBridge_InitPins:
+- options: {callFromInitBoot: 'false', coreID: core0, enableClock: 'true'}
+- pin_list:
+  - {pin_num: J12, peripheral: GPIOA, signal: 'GPIO, 25', pin_signal: CMP3_IN5/PTA25/MII0_TXCLK/FB_A28, direction: OUTPUT}
+  - {pin_num: A12, peripheral: GPIOC, signal: 'GPIO, 2', pin_signal: ADC0_SE4b/CMP1_IN0/TSI0_CH15/PTC2/SPI0_PCS2/UART1_CTS_b/FTM0_CH1/FB_AD12/SDRAM_A20/I2S0_TX_FS,
+    direction: OUTPUT}
+  - {pin_num: D8, peripheral: GPIOC, signal: 'GPIO, 5', pin_signal: PTC5/LLWU_P9/SPI0_SCK/LPTMR0_ALT2/I2S0_RXD0/FB_AD10/SDRAM_A18/CMP0_OUT/FTM0_CH2, direction: OUTPUT}
+  - {pin_num: A7, peripheral: GPIOC, signal: 'GPIO, 12', pin_signal: PTC12/UART4_RTS_b/FTM_CLKIN0/FB_AD27/SDRAM_D27/FTM3_FLT0/TPM_CLKIN0, direction: OUTPUT}
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
+ */
+/* clang-format on */
+
+/* FUNCTION ************************************************************************************************************
+ *
+ * Function Name : DualHBridge_InitPins
+ * Description   : Configures pin routing and optionally pin electrical features.
+ *
+ * END ****************************************************************************************************************/
+void DualHBridge_InitPins(void)
+{
+    /* Port A Clock Gate Control: Clock enabled */
+    CLOCK_EnableClock(kCLOCK_PortA);
+    /* Port C Clock Gate Control: Clock enabled */
+    CLOCK_EnableClock(kCLOCK_PortC);
+
+    /* PORTA25 (pin J12) is configured as PTA25 */
+    PORT_SetPinMux(DUALHBRIDGE_INITPINS_CMP3_IN5_PORT, DUALHBRIDGE_INITPINS_CMP3_IN5_PIN, kPORT_MuxAsGpio);
+
+    /* PORTC12 (pin A7) is configured as PTC12 */
+    PORT_SetPinMux(DUALHBRIDGE_INITPINS_FB_AD27_PORT, DUALHBRIDGE_INITPINS_FB_AD27_PIN, kPORT_MuxAsGpio);
+
+    /* PORTC2 (pin A12) is configured as PTC2 */
+    PORT_SetPinMux(DUALHBRIDGE_INITPINS_FTM0_CH1_PORT, DUALHBRIDGE_INITPINS_FTM0_CH1_PIN, kPORT_MuxAsGpio);
+
+    /* PORTC5 (pin D8) is configured as PTC5 */
+    PORT_SetPinMux(DUALHBRIDGE_INITPINS_FB_AD10_PORT, DUALHBRIDGE_INITPINS_FB_AD10_PIN, kPORT_MuxAsGpio);
 }
 /***********************************************************************************************************************
  * EOF

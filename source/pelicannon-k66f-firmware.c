@@ -53,7 +53,6 @@
 #include "frdm_k66f.h"
 #include "core_cm4.h"
 
-
 /* ISSDK Includes */
 #include "issdk_hal.h"
 #include "gpio_driver.h"
@@ -65,6 +64,7 @@
 
 /* Local Prototypes */
 static void Ninedof_Task(void *pvParameters);
+static void UART_Task(void *pvParameters);
 void Sensors_Init();
 
 /* Synchronization Primitives */
@@ -83,7 +83,7 @@ fxos8700_i2c_sensorhandle_t fxos8700Driver;
 const registerwritelist_t fxos8700_Config_ISR[] = {
     /*! System and Control registers. */
     /*! Configure the FXOS8700 to 100Hz sampling rate. */
-    {FXOS8700_CTRL_REG1, FXOS8700_CTRL_REG1_DR_HYBRID_200_HZ, FXOS8700_CTRL_REG1_DR_MASK},
+    {FXOS8700_CTRL_REG1, FXOS8700_CTRL_REG1_DR_HYBRID_100_HZ, FXOS8700_CTRL_REG1_DR_MASK},
     {FXOS8700_CTRL_REG3, FXOS8700_CTRL_REG3_IPOL_ACTIVE_HIGH | FXOS8700_CTRL_REG3_PP_OD_PUSH_PULL,
      FXOS8700_CTRL_REG3_IPOL_MASK | FXOS8700_CTRL_REG3_PP_OD_MASK}, /*! Active High, Push-Pull */
     {FXOS8700_CTRL_REG4, FXOS8700_CTRL_REG4_INT_EN_DRDY_EN,
@@ -120,7 +120,9 @@ void FXAS21002_ISR(void *pUserData){
 
     GENERIC_DRIVER_GPIO *gpioDriver = &Driver_GPIO_KSDK;
 
-    gpioDriver->write_pin(&GPIO_DEBUG_2, 1);
+#ifdef GPIO_DEBUG_MODE
+    gpioDriver->write_pin(&GPIO_DEBUG_1, 1);
+#endif
 
     xHigherPriorityTaskWoken = pdFALSE;
 
@@ -134,7 +136,7 @@ void FXAS21002_ISR(void *pUserData){
           portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
       }
 
-    gpioDriver->write_pin(&GPIO_DEBUG_2, 0);
+
 
 }
 
@@ -143,7 +145,9 @@ void FXOS8700_ISR(void *pUserData){
 
     GENERIC_DRIVER_GPIO *gpioDriver = &Driver_GPIO_KSDK;
 
-    gpioDriver->write_pin(&GPIO_DEBUG_3, 1);
+#ifdef GPIO_DEBUG_MODE
+    gpioDriver->write_pin(&GPIO_DEBUG_2, 1);
+#endif
 
     xHigherPriorityTaskWoken = pdFALSE;
 
@@ -157,10 +161,82 @@ void FXOS8700_ISR(void *pUserData){
           portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
       }
 
-    gpioDriver->write_pin(&GPIO_DEBUG_3, 0);
-
 }
 
+void Sensors_Init(){
+    int32_t status;
+
+    /* Setup Interupts */
+    GENERIC_DRIVER_GPIO *gpioDriver = &Driver_GPIO_KSDK;
+
+    gpioDriver->pin_init(&FXAS21002_INT1, GPIO_DIRECTION_IN, NULL, &FXAS21002_ISR, NULL);
+    gpioDriver->pin_init(&FXOS8700_INT2, GPIO_DIRECTION_IN, NULL, &FXOS8700_ISR, NULL);
+
+#ifdef GPIO_DEBUG_MODE
+    gpioDriver->pin_init(&GPIO_DEBUG_1, GPIO_DIRECTION_OUT, NULL, NULL, NULL);
+    gpioDriver->pin_init(&GPIO_DEBUG_2, GPIO_DIRECTION_OUT, NULL, NULL, NULL);
+    gpioDriver->pin_init(&GPIO_DEBUG_3, GPIO_DIRECTION_OUT, NULL, NULL, NULL);
+#endif
+
+    /*! Initialize the I2C driver. */
+    status = I2Cdrv->Initialize(I2C0_SignalEvent_t);
+    if (ARM_DRIVER_OK != status)
+    {
+        PRINTF("I2C Initialization Failed\r\n");
+        return;
+    }
+
+    /*! Set the I2C Power mode. */
+    status = I2Cdrv->PowerControl(ARM_POWER_FULL);
+    if (ARM_DRIVER_OK != status)
+    {
+        PRINTF("I2C Power Mode setting Failed\r\n");
+        return;
+    }
+
+    /*! Set the I2C bus speed. */
+    status = I2Cdrv->Control(ARM_I2C_BUS_SPEED, ARM_I2C_BUS_SPEED_FAST);
+    if (ARM_DRIVER_OK != status)
+    {
+        PRINTF("I2C Control Mode setting Failed\r\n");
+        return;
+    }
+
+    /*! Initialize the FXAS21002 sensor driver. */
+    status = FXAS21002_I2C_Initialize(&fxas21002Driver, &GYRO_I2C_DEVICE, GYRO_I2C_INDEX, GYRO_I2C_ADDRESS,
+                                      FXAS21002_WHO_AM_I_WHOAMI_PROD_VALUE);
+    if (SENSOR_ERROR_NONE != status)
+    {
+        PRINTF("FXAS21002 Initialization Failed\r\n");
+        return;
+    }
+
+    /*! Configure the FXAS21002 sensor driver. */
+    status = FXAS21002_I2C_Configure(&fxas21002Driver, fxas21002_Config_ISR);
+    if (SENSOR_ERROR_NONE != status)
+    {
+        PRINTF("FXAS21002 Sensor Configuration Failed, Err = %d\r\n", status);
+        return;
+    }
+
+    /*! Initialize the FXOS8700 sensor driver. */
+    status = FXOS8700_I2C_Initialize(&fxos8700Driver, &XM_I2C_DEVICE, XM_I2C_INDEX, XM_I2C_ADDRESS,
+                                     FXOS8700_WHO_AM_I_PROD_VALUE);
+    if (SENSOR_ERROR_NONE != status)
+    {
+        PRINTF("FXOS8700 Initialization Failed\r\n");
+        return;
+    }
+
+    /*! Configure the FXOS8700 sensor driver. */
+    status = FXOS8700_I2C_Configure(&fxos8700Driver, fxos8700_Config_ISR);
+    if (SENSOR_ERROR_NONE != status)
+    {
+        PRINTF("FXOS8700 Sensor Configuration Failed, Err = %d\r\n", status);
+        return;
+    }
+
+}
 
 /*
  * @brief   Application entry point.
@@ -182,8 +258,13 @@ int main(void) {
     ninedof_event_group = xEventGroupCreate();
 
     /* Create tasks */
-    if (xTaskCreate(Ninedof_Task, "ninedof_task", 1024, 0, configMAX_PRIORITIES-1, 0) != pdPASS){
-    	PRINTF("\r\n Failed to create ninedof_task\r\n");
+    if (xTaskCreate(Ninedof_Task, "ninedof_task", 1024, NULL, configMAX_PRIORITIES-1, 0) != pdPASS){
+    	PRINTF("Failed to create ninedof_task\r\n");
+    	while(1);
+    }
+
+    if (xTaskCreate(UART_Task, "uart_task", 1024, NULL, configMAX_PRIORITIES-1, 0) != pdPASS){
+    	PRINTF("Failed to create ninedof_task\r\n");
     	while(1);
     }
 
@@ -192,82 +273,9 @@ int main(void) {
     	;
 }
 
-void Sensors_Init(){
-    int32_t status;
-
-    /* Setup Interupts */
-    GENERIC_DRIVER_GPIO *gpioDriver = &Driver_GPIO_KSDK;
-
-    gpioDriver->pin_init(&GPIO_DEBUG_1, GPIO_DIRECTION_OUT, NULL, NULL, NULL);
-    gpioDriver->pin_init(&GPIO_DEBUG_2, GPIO_DIRECTION_OUT, NULL, NULL, NULL);
-    gpioDriver->pin_init(&GPIO_DEBUG_3, GPIO_DIRECTION_OUT, NULL, NULL, NULL);
-
-    gpioDriver->pin_init(&FXAS21002_INT1, GPIO_DIRECTION_IN, NULL, &FXAS21002_ISR, NULL);
-    gpioDriver->pin_init(&FXOS8700_INT2, GPIO_DIRECTION_IN, NULL, &FXOS8700_ISR, NULL);
-
-    /*! Initialize the I2C driver. */
-    status = I2Cdrv->Initialize(I2C0_SignalEvent_t);
-    if (ARM_DRIVER_OK != status)
-    {
-        PRINTF("\r\n I2C Initialization Failed\r\n");
-        return;
-    }
-
-    /*! Set the I2C Power mode. */
-    status = I2Cdrv->PowerControl(ARM_POWER_FULL);
-    if (ARM_DRIVER_OK != status)
-    {
-        PRINTF("\r\n I2C Power Mode setting Failed\r\n");
-        return;
-    }
-
-    /*! Set the I2C bus speed. */
-    status = I2Cdrv->Control(ARM_I2C_BUS_SPEED, ARM_I2C_BUS_SPEED_FAST);
-    if (ARM_DRIVER_OK != status)
-    {
-        PRINTF("\r\n I2C Control Mode setting Failed\r\n");
-        return;
-    }
-
-    /*! Initialize the FXAS21002 sensor driver. */
-    status = FXAS21002_I2C_Initialize(&fxas21002Driver, &GYRO_I2C_DEVICE, GYRO_I2C_INDEX, GYRO_I2C_ADDRESS,
-                                      FXAS21002_WHO_AM_I_WHOAMI_PROD_VALUE);
-    if (SENSOR_ERROR_NONE != status)
-    {
-        PRINTF("\r\n FXAS21002 Initialization Failed\r\n");
-        return;
-    }
-
-    /*! Configure the FXAS21002 sensor driver. */
-    status = FXAS21002_I2C_Configure(&fxas21002Driver, fxas21002_Config_ISR);
-    if (SENSOR_ERROR_NONE != status)
-    {
-        PRINTF("\r\n FXAS21002 Sensor Configuration Failed, Err = %d\r\n", status);
-        return;
-    }
-
-    /*! Initialize the FXOS8700 sensor driver. */
-    status = FXOS8700_I2C_Initialize(&fxos8700Driver, &XM_I2C_DEVICE, XM_I2C_INDEX, XM_I2C_ADDRESS,
-                                     FXOS8700_WHO_AM_I_PROD_VALUE);
-    if (SENSOR_ERROR_NONE != status)
-    {
-        PRINTF("\r\n FXOS8700 Initialization Failed\r\n");
-        return;
-    }
-
-    /*! Configure the FXOS8700 sensor driver. */
-    status = FXOS8700_I2C_Configure(&fxos8700Driver, fxos8700_Config_ISR);
-    if (SENSOR_ERROR_NONE != status)
-    {
-        PRINTF("\r\n FXOS8700 Sensor Configuration Failed, Err = %d\r\n", status);
-        return;
-    }
-
-
-    PRINTF("\r\n Succesfully initialized sensors!\r\n");
+static void UART_Task(void *pvParameters){
 
 }
-
 
 static void Ninedof_Task(void *pvParameters){
 
@@ -289,23 +297,41 @@ static void Ninedof_Task(void *pvParameters){
 
     GENERIC_DRIVER_GPIO *gpioDriver = &Driver_GPIO_KSDK;
 
-
-
     flag_xm = 0; flag_g = 0;
     for(;;){
 
+#ifdef GPIO_DEBUG_MODE
+		if (gpioDriver->read_pin(&FXOS8700_INT2)){
+		    gpioDriver->write_pin(&GPIO_DEBUG_2, 1);
+		}else{
+		    gpioDriver->write_pin(&GPIO_DEBUG_2, 0);
+		}
+
+		if (gpioDriver->read_pin(&FXAS21002_INT1)){
+		    gpioDriver->write_pin(&GPIO_DEBUG_1, 1);
+		}else{
+		    gpioDriver->write_pin(&GPIO_DEBUG_1, 0);
+		}
+#endif
+
     	if (flag_xm && flag_g){
-    	    gpioDriver->write_pin(&GPIO_DEBUG_1, 1);
+
+#ifdef GPIO_DEBUG_MODE
+    	    gpioDriver->write_pin(&GPIO_DEBUG_3, 1);
+#endif
 
     		flag_xm = 0;
     		flag_g = 0;
-    		event_wait_for = EVENT_XM | EVENT_G;
 
-    		gpioDriver->write_pin(&GPIO_DEBUG_1, 0);
+#ifdef GPIO_DEBUG_MODE
+    		event_wait_for = EVENT_XM | EVENT_G;
+#endif
+
+    		gpioDriver->write_pin(&GPIO_DEBUG_3, 0);
     	} else if(flag_xm){
-    		event_wait_for = EVENT_G;
+    		event_wait_for = EVENT_G | EVENT_XM ;
     	} else if(flag_g){
-    		event_wait_for = EVENT_XM;
+    		event_wait_for = EVENT_G | EVENT_XM;
     	}
 
 		event_set = xEventGroupWaitBits(ninedof_event_group,
@@ -315,18 +341,18 @@ static void Ninedof_Task(void *pvParameters){
 										 0xFFFFFFFF);
 
 
-		if (event_set & EVENT_XM || gpioDriver->read_pin(&FXOS8700_INT2)){
+		if (event_set & EVENT_XM){
 			flag_xm = 1;
 
-	        /*! Read the raw sensor data from the fxos8700. */
+
+	        /*! Read the raw sensor data from the FXOS8700. */
 	        status = FXOS8700_I2C_ReadData(&fxos8700Driver, fxos8700_Read, rawData_XM);
 	        if (ARM_DRIVER_OK != status)
 	        {
-	            PRINTF("\r\n FXOS8700 Read Failed. \r\n");
+	            PRINTF("FXOS8700 Read Failed.\r\n");
 	            return;
 	        }
 
-	        /*! Convert the raw sensor data to signed 16-bit container for display to the debug port. */
 	        data_XM.mag[0] = ((int16_t)rawData_XM[0] << 8) | rawData_XM[1];
 	        data_XM.mag[1] = ((int16_t)rawData_XM[2] << 8) | rawData_XM[3];
 	        data_XM.mag[2] = ((int16_t)rawData_XM[4] << 8) | rawData_XM[5];
@@ -337,16 +363,17 @@ static void Ninedof_Task(void *pvParameters){
 	        data_XM.accel[1] /= 4;
 	        data_XM.accel[2] = ((int16_t)rawData_XM[10] << 8) | rawData_XM[11];
 	        data_XM.accel[2] /= 4;
+
 		}
 
-		if (event_set & EVENT_G || gpioDriver->read_pin(&FXAS21002_INT1)){
+		if (event_set & EVENT_G){
 			flag_g = 1;
 
 	        /*! Read the raw sensor data from the FXAS21002. */
 	        status = FXAS21002_I2C_ReadData(&fxas21002Driver, fxas21002_Read, rawData_G);
 	        if (ARM_DRIVER_OK != status)
 	        {
-	            PRINTF("\r\n FXAS21002 Read Failed. \r\n");
+	            PRINTF("FXAS21002 Read Failed.\r\n");
 	            return;
 	        }
 
