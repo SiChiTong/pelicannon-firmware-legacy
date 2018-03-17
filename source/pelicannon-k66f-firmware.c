@@ -50,9 +50,11 @@
 
 /* CMSIS Includes */
 #include "Driver_I2C.h"
+#include "frdm_k66f.h"
 
 /* ISSDK Includes */
 #include "issdk_hal.h"
+#include "gpio_driver.h"
 #include "fxas21002_drv.h"
 #include "fxos8700_drv.h"
 
@@ -135,11 +137,17 @@ int main(void) {
     /* Initialize Synchronization Primitives */
     ninedof_event_group = xEventGroupCreate();
 
+    /* Setup Interupts */
+    GENERIC_DRIVER_GPIO *gpioDriver = &Driver_GPIO_KSDK;
+
+    gpioDriver->pin_init(&FXAS21002_INT1, GPIO_DIRECTION_IN, NULL, &FXAS21002_ISR, NULL);
+    gpioDriver->pin_init(&FXOS8700_INT2, GPIO_DIRECTION_IN, NULL, &FXOS8700_ISR, NULL);
+
     //Configure I2C and Mag/Accel/Gyro
     Sensors_Init();
 
     /* Create tasks */
-    if (xTaskCreate(ninedof_task, "ninedof_task", configMINIMAL_STACK_SIZE, 0, configMAX_PRIORITIES-1, 0) != pdPASS){
+    if (xTaskCreate(ninedof_task, "ninedof_task", 1024, 0, configMAX_PRIORITIES-1, 0) != pdPASS){
     	PRINTF("\r\n Failed to create ninedof_task\r\n");
     	while(1);
     }
@@ -150,6 +158,8 @@ int main(void) {
 
 void Sensors_Init(){
     int32_t status;
+
+
 
     /*! Initialize the I2C driver. */
     status = I2Cdrv->Initialize(I2C0_SignalEvent_t);
@@ -185,7 +195,7 @@ void Sensors_Init(){
     }
 
     /*! Configure the FXAS21002 sensor driver. */
-    status = FXAS21002_I2C_Configure(&fxas21002Driver, FXAS21002_ISR);
+    status = FXAS21002_I2C_Configure(&fxas21002Driver, fxas21002_Config_ISR);
     if (SENSOR_ERROR_NONE != status)
     {
         PRINTF("\r\n FXAS21002 Sensor Configuration Failed, Err = %d\r\n", status);
@@ -202,7 +212,7 @@ void Sensors_Init(){
     }
 
     /*! Configure the FXOS8700 sensor driver. */
-    status = FXOS8700_I2C_Configure(&fxos8700Driver, FXOS8700_ISR);
+    status = FXOS8700_I2C_Configure(&fxos8700Driver, fxos8700_Config_ISR);
     if (SENSOR_ERROR_NONE != status)
     {
         PRINTF("\r\n FXOS8700 Sensor Configuration Failed, Err = %d\r\n", status);
@@ -260,11 +270,8 @@ static void ninedof_task(void *pvParameters){
 
 	        /*! Convert the raw sensor data to signed 16-bit container for display to the debug port. */
 	        data_XM.mag[0] = ((int16_t)rawData_XM[0] << 8) | rawData_XM[1];
-	        data_XM.mag[0] /= 4;
 	        data_XM.mag[1] = ((int16_t)rawData_XM[2] << 8) | rawData_XM[3];
-	        data_XM.mag[1] /= 4;
 	        data_XM.mag[2] = ((int16_t)rawData_XM[4] << 8) | rawData_XM[5];
-	        data_XM.mag[2] /= 4;
 
 	        data_XM.accel[0] = ((int16_t)rawData_XM[6] << 8) | rawData_XM[7];
 	        data_XM.accel[0] /= 4;
@@ -281,7 +288,7 @@ static void ninedof_task(void *pvParameters){
 	        status = FXAS21002_I2C_ReadData(&fxas21002Driver, fxas21002_Read, rawData_G);
 	        if (ARM_DRIVER_OK != status)
 	        {
-	            PRINTF("\r\n Read Failed. \r\n");
+	            PRINTF("\r\n FXAS21002 Read Failed. \r\n");
 	            return;
 	        }
 

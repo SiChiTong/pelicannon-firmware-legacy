@@ -5,6 +5,10 @@
 
 #include "fsl_i2c_cmsis.h"
 #include "register_io_i2c.h"
+#include "gpio_driver.h"
+
+extern gpioHandleKSDK_t FXAS21002_INT1;
+extern gpioHandleKSDK_t FXOS8700_INT1;
 
 uint32_t I2C0_GetFreq(void);
 void I2C0_InitPins(void);
