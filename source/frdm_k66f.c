@@ -9,7 +9,8 @@
 #include "fsl_clock.h"
 #include "pin_mux.h"
 
-gpioHandleKSDK_t FXAS21002_INT1 = {.base = GPIOA,
+// Mag/Accel & Gyro Interrupt GPIO
+gpioHandleKSDK_t GPIO_PTA29 = {.base = GPIOA,
                          .portBase = PORTA,
                          .pinNumber = 29,
                          .mask = 1 << (0),
@@ -17,7 +18,7 @@ gpioHandleKSDK_t FXAS21002_INT1 = {.base = GPIOA,
                          .clockName = kCLOCK_PortA,
                          .portNumber = PORTA_NUM};
 
-gpioHandleKSDK_t FXAS21002_INT2 = {.base = GPIOA,
+gpioHandleKSDK_t GPIO_PTA28 = {.base = GPIOA,
                          .portBase = PORTA,
                          .pinNumber = 28,
                          .mask = 1 << (0),
@@ -25,7 +26,7 @@ gpioHandleKSDK_t FXAS21002_INT2 = {.base = GPIOA,
                          .clockName = kCLOCK_PortA,
                          .portNumber = PORTA_NUM};
 
-gpioHandleKSDK_t FXOS8700_INT1 = {.base = GPIOC,
+gpioHandleKSDK_t GPIO_PTC17 = {.base = GPIOC,
                          .portBase = PORTC,
                          .pinNumber = 17,
                          .mask = 1 << (0),
@@ -33,7 +34,7 @@ gpioHandleKSDK_t FXOS8700_INT1 = {.base = GPIOC,
                          .clockName = kCLOCK_PortC,
                          .portNumber = PORTC_NUM};
 
-gpioHandleKSDK_t FXOS8700_INT2 = {.base = GPIOC,
+gpioHandleKSDK_t GPIO_PTC13 = {.base = GPIOC,
                          .portBase = PORTC,
                          .pinNumber = 13,
                          .mask = 1 << (0),
@@ -140,10 +141,6 @@ gpioHandleKSDK_t GPIO_PTC12 = {.base = GPIOC,
                          .clockName = kCLOCK_PortC,
                          .portNumber = PORTC_NUM};
 
-uint32_t I2C0_GetFreq(void){
-	return CLOCK_GetFreq(I2C0_CLK_SRC);
-}
-void I2C0_InitPins(void){
-	NineDoF_InitPins();
-}
+uint32_t I2C0_GetFreq(void){return CLOCK_GetFreq(I2C0_CLK_SRC);}
+void I2C0_InitPins(void){}
 void I2C0_DeinitPins(void){}

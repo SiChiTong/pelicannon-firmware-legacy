@@ -65,6 +65,7 @@
 /* Local Prototypes */
 static void Ninedof_Task(void *pvParameters);
 static void UART_Task(void *pvParameters);
+static void Motor_Task(void *pvParameters);
 void Sensors_Init();
 
 /* Synchronization Primitives */
@@ -250,7 +251,11 @@ int main(void) {
   	/* Init FSL debug console. */
     BOARD_InitDebugConsole();
 
-    /* Lower ISR priorities to below FreeRTOS task level */
+	NineDoF_InitPins();
+	JetsonTK1_InitPins();
+	DualHBridge_InitPins();
+
+    /* Lower GPIO Port ISR priorities to below FreeRTOS task level */
     NVIC_SetPriority(PORTA_IRQn, 0x02);
     NVIC_SetPriority(PORTC_IRQn, 0x02);
 
@@ -258,19 +263,28 @@ int main(void) {
     ninedof_event_group = xEventGroupCreate();
 
     /* Create tasks */
-    if (xTaskCreate(Ninedof_Task, "ninedof_task", 1024, NULL, configMAX_PRIORITIES-1, 0) != pdPASS){
-    	PRINTF("Failed to create ninedof_task\r\n");
+    if (xTaskCreate(Ninedof_Task, "Ninedof_Task", 1024, NULL, configMAX_PRIORITIES-1, 0) != pdPASS){
+    	PRINTF("Failed to create Ninedof_Task\r\n");
     	while(1);
     }
 
-    if (xTaskCreate(UART_Task, "uart_task", 1024, NULL, configMAX_PRIORITIES-1, 0) != pdPASS){
-    	PRINTF("Failed to create ninedof_task\r\n");
+    if (xTaskCreate(UART_Task, "Uart_Task", 1024, NULL, configMAX_PRIORITIES-1, 0) != pdPASS){
+    	PRINTF("Failed to create Ninedof_Task\r\n");
+    	while(1);
+    }
+
+    if (xTaskCreate(Motor_Task, "Motor_Task", 1024, NULL, configMAX_PRIORITIES-1, 0) != pdPASS){
+    	PRINTF("Failed to create Motor_Task\r\n");
     	while(1);
     }
 
     vTaskStartScheduler();
     for (;;)
     	;
+}
+
+static void Motor_Task(void *pvParameters){
+
 }
 
 static void UART_Task(void *pvParameters){
