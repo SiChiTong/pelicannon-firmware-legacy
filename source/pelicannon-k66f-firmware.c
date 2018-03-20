@@ -315,17 +315,15 @@ static void Ninedof_Task(void *pvParameters){
     for(;;){
 
 #ifdef GPIO_DEBUG_MODE
-		if (gpioDriver->read_pin(&FXOS8700_INT2)){
+		if (gpioDriver->read_pin(&FXOS8700_INT2))
 		    gpioDriver->write_pin(&GPIO_DEBUG_2, 1);
-		}else{
+		else
 		    gpioDriver->write_pin(&GPIO_DEBUG_2, 0);
-		}
 
-		if (gpioDriver->read_pin(&FXAS21002_INT1)){
+		if (gpioDriver->read_pin(&FXAS21002_INT1))
 		    gpioDriver->write_pin(&GPIO_DEBUG_1, 1);
-		}else{
+		else
 		    gpioDriver->write_pin(&GPIO_DEBUG_1, 0);
-		}
 #endif
 
     	if (flag_xm && flag_g){
