@@ -50,7 +50,6 @@
 
 /* CMSIS Includes */
 #include "Driver_I2C.h"
-#include "frdm_k66f.h"
 #include "core_cm4.h"
 
 /* ISSDK Includes */

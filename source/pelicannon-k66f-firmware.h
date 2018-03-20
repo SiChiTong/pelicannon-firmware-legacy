@@ -8,7 +8,7 @@
 #ifndef PELICANNON_K66F_FIRMWARE_H_
 #define PELICANNON_K66F_FIRMWARE_H_
 
-#include "frdm_k66f.h"
+#include "board.h"
 #include "fsl_i2c_cmsis.h"
 
 #define XM_I2C_ADDRESS 0x1D
