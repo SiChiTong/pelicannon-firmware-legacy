@@ -9,5 +9,6 @@
 #define NINEDOF_H_
 
 void Ninedof_Task(void *pvParameters);
+void NineDoF_Init();
 
 #endif /* NINEDOF_H_ */

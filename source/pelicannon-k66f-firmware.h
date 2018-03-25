@@ -24,4 +24,7 @@
 #define GPIO_DEBUG_MODE
 
 
+#define ASSERT(x) if((x) == 0) {for (;;);}
+
+
 #endif /* PELICANNON_K66F_FIRMWARE_H_ */

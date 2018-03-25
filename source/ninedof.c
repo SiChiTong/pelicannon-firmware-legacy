@@ -224,9 +224,6 @@ void Ninedof_Task(void *pvParameters){
     fxas21002_gyrodata_t data_G;
     fxos8700_accelmagdata_t data_XM;
 
-    //Configure I2C and Mag/Accel/Gyro
-    NineDoF_Init();
-
     GENERIC_DRIVER_GPIO *gpioDriver = &Driver_GPIO_KSDK;
 
     flag_xm = 0; flag_g = 0;
@@ -267,7 +264,7 @@ void Ninedof_Task(void *pvParameters){
 										NINEDOF_EVENT_XM | NINEDOF_EVENT_G,
 										 pdTRUE,
 										 pdFALSE,
-										 0xFFFFFFFF);
+										 portMAX_DELAY);
 
 
 		if (event_set & NINEDOF_EVENT_XM){

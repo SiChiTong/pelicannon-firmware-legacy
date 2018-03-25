@@ -72,13 +72,13 @@ extern gpioHandleKSDK_t GPIO_PTA1;
 
 // Header 4 Row 2 GPIO
 extern gpioHandleKSDK_t GPIO_PTA25;
-#define MOTOR_A1 GPIO_PTA25
+#define GPIO_MOTOR_A1 GPIO_PTA25
 extern gpioHandleKSDK_t GPIO_PTC2;
-#define MOTOR_A2 GPIO_PTC2
+#define GPIO_MOTOR_A2 GPIO_PTC2
 extern gpioHandleKSDK_t GPIO_PTC5;
-#define MOTOR_B1 GPIO_PTC5
+#define GPIO_MOTOR_B1 GPIO_PTC5
 extern gpioHandleKSDK_t GPIO_PTC12;
-#define MOTOR_B2 GPIO_PTC12
+#define GPIO_MOTOR_B2 GPIO_PTC12
 
 uint32_t I2C0_GetFreq(void);
 void I2C0_InitPins(void);

@@ -75,6 +75,11 @@ int main(void) {
     NVIC_SetPriority(PORTA_IRQn, 0x02);
     NVIC_SetPriority(PORTC_IRQn, 0x02);
 
+    /* Initialize functionality groups before starting tasks to avoid race conditions */
+    NineDoF_Init();
+    DualHBridge_Init();
+    TK1_Init();
+
     /* Create tasks */
     if (xTaskCreate(Ninedof_Task, "Ninedof_Task", 1024, NULL, configMAX_PRIORITIES-1, 0) != pdPASS){
     	PRINTF("Failed to create Ninedof_Task\r\n");
