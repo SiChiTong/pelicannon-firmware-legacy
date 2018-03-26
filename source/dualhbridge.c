@@ -6,6 +6,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include "board.h"
 #include "peripherals.h"
@@ -30,7 +31,6 @@
 #define DUALHBRIDGE_EVENT_ABORT (1<<1)
 
 static EventGroupHandle_t dualhbridge_event_group = NULL;
-
 static SemaphoreHandle_t dualhbridge_data_mutex = NULL;
 
 /* Variables */
@@ -159,13 +159,13 @@ void DualHBridge_Task(void *pvParameters){
 				xSemaphoreTake(dualhbridge_data_mutex, portMAX_DELAY);
 				if (dualhbridge_current_steps != dualhbridge_target_steps){
 
-					if(dualhbridge_target_steps < dualhbridge_current_steps){
+					if(dualhbridge_current_steps < dualhbridge_target_steps){
 						//STEP Forwards
-						DualHBridge__Step((dualhbridge_current_steps+1) % 4);
+						DualHBridge__Step(abs(dualhbridge_current_steps+1) % 4);
 						dualhbridge_current_steps++;
-					}else if(dualhbridge_target_steps > dualhbridge_current_steps){
+					}else if(dualhbridge_current_steps > dualhbridge_target_steps){
 						//STEP Back
-						DualHBridge__Step((dualhbridge_current_steps-1) % 4);
+						DualHBridge__Step(abs(dualhbridge_current_steps-1) % 4);
 						dualhbridge_current_steps--;
 					}
 

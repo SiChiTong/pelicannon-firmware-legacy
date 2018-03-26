@@ -53,6 +53,8 @@
 #include "ninedof.h"
 #include "tk1.h"
 #include "dualhbridge.h"
+#include "tests.h"
+
 
 /*
  * @brief   Application entry point.
@@ -95,6 +97,14 @@ int main(void) {
     	PRINTF("Failed to create Ninedof_Task\r\n");
     	while(1);
     }
+
+    /* Tests */
+#ifdef MOTOR_TEST
+    if (xTaskCreate(Motor_Test_Task, "Motor_Test_Task", 1024, NULL, configMAX_PRIORITIES-1, 0) != pdPASS){
+    	PRINTF("Failed to create Motor_Test_Task\r\n");
+    	while(1);
+    }
+#endif
 
     vTaskStartScheduler();
     while(1);

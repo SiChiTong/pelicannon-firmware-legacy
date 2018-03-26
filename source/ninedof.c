@@ -87,9 +87,9 @@ const registerreadlist_t fxas21002_Read[] = {
 void FXAS21002_ISR(void *pUserData){
     BaseType_t xHigherPriorityTaskWoken, xResult;
 
+#ifdef GPIO_DEBUG_MODE
     GENERIC_DRIVER_GPIO *gpioDriver = &Driver_GPIO_KSDK;
 
-#ifdef GPIO_DEBUG_MODE
     gpioDriver->write_pin(&GPIO_DEBUG_1, 1);
 #endif
 
@@ -112,9 +112,9 @@ void FXAS21002_ISR(void *pUserData){
 void FXOS8700_ISR(void *pUserData){
     BaseType_t xHigherPriorityTaskWoken, xResult;
 
+#ifdef GPIO_DEBUG_MODE
     GENERIC_DRIVER_GPIO *gpioDriver = &Driver_GPIO_KSDK;
 
-#ifdef GPIO_DEBUG_MODE
     gpioDriver->write_pin(&GPIO_DEBUG_2, 1);
 #endif
 
@@ -224,12 +224,12 @@ void Ninedof_Task(void *pvParameters){
     fxas21002_gyrodata_t data_G;
     fxos8700_accelmagdata_t data_XM;
 
-    GENERIC_DRIVER_GPIO *gpioDriver = &Driver_GPIO_KSDK;
-
     flag_xm = 0; flag_g = 0;
     for(;;){
 
 #ifdef GPIO_DEBUG_MODE
+    	GENERIC_DRIVER_GPIO *gpioDriver = &Driver_GPIO_KSDK;
+
 		if (gpioDriver->read_pin(&FXOS8700_INT2))
 		    gpioDriver->write_pin(&GPIO_DEBUG_2, 1);
 		else

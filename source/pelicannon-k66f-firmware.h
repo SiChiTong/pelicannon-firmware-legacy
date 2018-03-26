@@ -21,7 +21,9 @@
 #define GYRO_I2C_EVENT I2C0_SignalEvent_t
 #define GYRO_I2C_INDEX 0
 
-#define GPIO_DEBUG_MODE
+//#define GPIO_DEBUG_MODE
+
+//#define MOTOR_TEST
 
 
 #define ASSERT(x) if((x) == 0) {for (;;);}
