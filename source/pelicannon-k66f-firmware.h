@@ -22,11 +22,8 @@
 #define GYRO_I2C_INDEX 0
 
 //#define GPIO_DEBUG_MODE
-
 //#define MOTOR_TEST
 
-
 #define ASSERT(x) if((x) == 0) {for (;;);}
-
 
 #endif /* PELICANNON_K66F_FIRMWARE_H_ */

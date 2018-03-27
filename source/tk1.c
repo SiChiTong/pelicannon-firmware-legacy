@@ -34,5 +34,7 @@ void TK1_Init(){
 }
 
 void TK1_Task(void *pvParameters){
-
+	for(;;){
+		vTaskDelay(1000 / portTICK_PERIOD_MS);
+	}
 }

@@ -8,6 +8,8 @@
 #ifndef TESTS_H_
 #define TESTS_H_
 
+#include "pelicannon-k66f-firmware.h"
+
 #ifdef MOTOR_TEST
 void Motor_Test_Task(void* pvParam);
 #endif
