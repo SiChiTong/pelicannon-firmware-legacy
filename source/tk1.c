@@ -111,7 +111,7 @@ void TK1_Ninedof_Task(void *pvParameters){
 	fxas21002_gyrodata_t g;
 	fxos8700_accelmagdata_t xm;
     EventBits_t event_set;
-	char data_send_buffer[128];
+	uint8_t data_send_buffer[128];
 
 	for(;;){
 		event_set = xEventGroupWaitBits(tk1_ninedof_event_group,
