@@ -11,6 +11,7 @@
 #include "pin_mux.h"
 #include "clock_config.h"
 #include "fsl_uart.h"
+#include "fsl_debug_console.h"
 #include "MK66F18.h"
 
 /* FreeRTOS Includes */
@@ -104,6 +105,9 @@ void TK1_NineDof_DataReady(){
 }
 
 void TK1_Ninedof_Task(void *pvParameters){
+#ifdef NINEDOF_DEBUG
+	int debug_output_counter = 0;
+#endif
 	fxas21002_gyrodata_t g;
 	fxos8700_accelmagdata_t xm;
     EventBits_t event_set;
@@ -121,6 +125,14 @@ void TK1_Ninedof_Task(void *pvParameters){
 
 			sprintf(data_send_buffer, "G:%d,%d,%d\r\nA:%d,%d,%d\r\nM:%d,%d,%d\r\n", g.gyro[0], g.gyro[1], g.gyro[2],
 					xm.accel[0], xm.accel[1], xm.accel[2], xm.mag[0], xm.mag[1], xm.mag[2]);
+
+#ifdef NINEDOF_DEBUG
+			debug_output_counter++;
+			if (debug_output_counter >= 25){
+	            PRINTF(data_send_buffer);
+				debug_output_counter = 0;
+			}
+#endif
 			UART_WriteBlocking(TK1_UART, data_send_buffer, strlen(data_send_buffer));
 
 		}

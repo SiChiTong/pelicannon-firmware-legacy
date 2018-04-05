@@ -85,7 +85,8 @@ const registerreadlist_t fxos8700_Read[] = {{.readFrom = FXOS8700_OUT_X_MSB, .nu
 #define G_DATA_READ_SIZE 6
 const registerreadlist_t fxas21002_Read[] = {
     {.readFrom = FXAS21002_OUT_X_MSB, .numBytes = G_DATA_READ_SIZE}, __END_READ_DATA__};
-
+const registerreadlist_t fxas21002_Status[] = {
+  {.readFrom = FXAS21002_STATUS, .numBytes = 1}, __END_READ_DATA__};
 
 /* ISR Routines */
 void FXAS21002_ISR(void *pUserData){
@@ -222,8 +223,8 @@ static fxos8700_accelmagdata_t ninedof_data_XM;
 
 void Ninedof_CopyData(fxas21002_gyrodata_t* g, fxos8700_accelmagdata_t* xm){
 	xSemaphoreTake(ninedof_data_mutex, portMAX_DELAY);
-	memcpy(&ninedof_data_G, g, sizeof(ninedof_data_G));
-	memcpy(&ninedof_data_XM, xm, sizeof(ninedof_data_XM));
+	memcpy(g, &ninedof_data_G, sizeof(ninedof_data_G));
+	memcpy(xm, &ninedof_data_XM, sizeof(ninedof_data_XM));
 	xSemaphoreGive(ninedof_data_mutex);
 }
 
@@ -270,7 +271,20 @@ void Ninedof_Task(void *pvParameters){
     		gpioDriver->write_pin(&GPIO_DEBUG_3, 0);
 #endif
 
-    	} else{
+    	} else if(flag_xm){
+
+    		/* Sometimes an interupt is missed for the gyrometer.
+    		 * If we have data for the accelerometer but not gyrometer,
+    		 * query status of gyrometer. If the watermark event or FIFO is overun,
+    		 * set the event to read the gyrometer data.
+    		 */
+    		uint8_t register_status;
+    		FXAS21002_I2C_ReadData(&fxas21002Driver, fxas21002_Status, &register_status);
+
+    		//If an overflow occured or data is waiting in the FIFO
+    		if(register_status & 0xC0){
+    			xEventGroupSetBits(ninedof_event_group, NINEDOF_EVENT_G);
+    		}
 
     	}
 
@@ -299,11 +313,11 @@ void Ninedof_Task(void *pvParameters){
 	        ninedof_data_XM.mag[2] = ((int16_t)rawData_XM[4] << 8) | rawData_XM[5];
 
 	        ninedof_data_XM.accel[0] = ((int16_t)rawData_XM[6] << 8) | rawData_XM[7];
-	        ninedof_data_XM.accel[0] /= 4;
+	        //ninedof_data_XM.accel[0] /= 4;
 	        ninedof_data_XM.accel[1] = ((int16_t)rawData_XM[8] << 8) | rawData_XM[9];
-	        ninedof_data_XM.accel[1] /= 4;
+	        //ninedof_data_XM.accel[1] /= 4;
 	        ninedof_data_XM.accel[2] = ((int16_t)rawData_XM[10] << 8) | rawData_XM[11];
-	        ninedof_data_XM.accel[2] /= 4;
+	        //ninedof_data_XM.accel[2] /= 4;
 	    	xSemaphoreGive(ninedof_data_mutex);
 
 		}
