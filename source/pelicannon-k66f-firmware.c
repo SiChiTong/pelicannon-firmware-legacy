@@ -99,7 +99,7 @@ int main(void) {
     	while(1);
     }
 
-    if (xTaskCreate(TK1_Ninedof_Task, "TK1_Ninedof_Task", 1024, NULL, configMAX_PRIORITIES-3, 0) != pdPASS){
+    if (xTaskCreate(TK1_Ninedof_Task, "TK1_Ninedof_Task", 1024, NULL, configMAX_PRIORITIES-1, 0) != pdPASS){
     	PRINTF("Failed to create TK1_Ninedof_Task\r\n");
     	while(1);
     }

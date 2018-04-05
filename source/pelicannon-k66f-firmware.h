@@ -23,7 +23,7 @@
 
 //#define GPIO_DEBUG_MODE
 //#define MOTOR_TEST
-#define NINEDOF_DEBUG
+//#define NINEDOF_DEBUG
 
 #define ASSERT(x) if((x) == 0) {for (;;);}
 

@@ -61,7 +61,7 @@ const registerwritelist_t fxos8700_Config_ISR[] = {
     {FXOS8700_CTRL_REG4, FXOS8700_CTRL_REG4_INT_EN_DRDY_EN,
      FXOS8700_CTRL_REG4_INT_EN_DRDY_MASK}, /*! Data Ready Event. */
     {FXOS8700_CTRL_REG5, FXOS8700_CTRL_REG5_INT_CFG_DRDY_INT2, FXOS8700_CTRL_REG5_INT_CFG_DRDY_MASK}, /*! INT2 Pin  */
-    /*! Configure the fxos8700 to Hybrid mode */
+    {FXOS8700_M_CTRL_REG1, FXOS8700_M_CTRL_REG1_M_HMS_HYBRID_MODE, FXOS8700_M_CTRL_REG1_M_HMS_MASK},
     {FXOS8700_M_CTRL_REG2, FXOS8700_M_CTRL_REG2_M_AUTOINC_HYBRID_MODE, FXOS8700_M_CTRL_REG2_M_AUTOINC_MASK},
     __END_WRITE_DATA__};
 
@@ -271,7 +271,7 @@ void Ninedof_Task(void *pvParameters){
     		gpioDriver->write_pin(&GPIO_DEBUG_3, 0);
 #endif
 
-    	} else if(flag_xm){
+    	} else if(flag_xm > 1){
 
     		/* Sometimes an interupt is missed for the gyrometer.
     		 * If we have data for the accelerometer but not gyrometer,
@@ -282,9 +282,8 @@ void Ninedof_Task(void *pvParameters){
     		FXAS21002_I2C_ReadData(&fxas21002Driver, fxas21002_Status, &register_status);
 
     		//If an overflow occured or data is waiting in the FIFO
-    		if(register_status & 0xC0){
+    		if(register_status & 0xC0)
     			xEventGroupSetBits(ninedof_event_group, NINEDOF_EVENT_G);
-    		}
 
     	}
 
@@ -296,7 +295,7 @@ void Ninedof_Task(void *pvParameters){
 
 
 		if (event_set & NINEDOF_EVENT_XM){
-			flag_xm = 1;
+			flag_xm += 1;
 
 
 	        /*! Read the raw sensor data from the FXOS8700. */
@@ -308,22 +307,21 @@ void Ninedof_Task(void *pvParameters){
 	        }
 
 	    	xSemaphoreTake(ninedof_data_mutex, portMAX_DELAY);
-	        ninedof_data_XM.mag[0] = ((int16_t)rawData_XM[0] << 8) | rawData_XM[1];
-	        ninedof_data_XM.mag[1] = ((int16_t)rawData_XM[2] << 8) | rawData_XM[3];
-	        ninedof_data_XM.mag[2] = ((int16_t)rawData_XM[4] << 8) | rawData_XM[5];
 
-	        ninedof_data_XM.accel[0] = ((int16_t)rawData_XM[6] << 8) | rawData_XM[7];
-	        //ninedof_data_XM.accel[0] /= 4;
-	        ninedof_data_XM.accel[1] = ((int16_t)rawData_XM[8] << 8) | rawData_XM[9];
-	        //ninedof_data_XM.accel[1] /= 4;
-	        ninedof_data_XM.accel[2] = ((int16_t)rawData_XM[10] << 8) | rawData_XM[11];
-	        //ninedof_data_XM.accel[2] /= 4;
+
+	        ninedof_data_XM.accel[0] = (int16_t)(((rawData_XM[0] << 8) | rawData_XM[1])) >> 2;
+	        ninedof_data_XM.accel[1] = (int16_t)(((rawData_XM[2] << 8) | rawData_XM[3])) >> 2;
+	        ninedof_data_XM.accel[2] = (int16_t)(((rawData_XM[4] << 8) | rawData_XM[5])) >> 2;
+
+	        ninedof_data_XM.mag[0] = ((int16_t)rawData_XM[6] << 8) | rawData_XM[7];
+	        ninedof_data_XM.mag[1] = ((int16_t)rawData_XM[8] << 8) | rawData_XM[9];
+	        ninedof_data_XM.mag[2] = ((int16_t)rawData_XM[10] << 8) | rawData_XM[11];
 	    	xSemaphoreGive(ninedof_data_mutex);
 
 		}
 
 		if (event_set & NINEDOF_EVENT_G){
-			flag_g = 1;
+			flag_g += 1;
 
 	        /*! Read the raw sensor data from the FXAS21002. */
 	        status = FXAS21002_I2C_ReadData(&fxas21002Driver, fxas21002_Read, rawData_G);

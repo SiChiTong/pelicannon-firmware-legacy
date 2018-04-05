@@ -123,17 +123,29 @@ void TK1_Ninedof_Task(void *pvParameters){
 		if (event_set & TK1_EVENT_9DOF_DRDY){
 			Ninedof_CopyData(&g, &xm);
 
+
+
+#ifdef NINEDOF_DEBUG
 			sprintf(data_send_buffer, "G:%d,%d,%d\r\nA:%d,%d,%d\r\nM:%d,%d,%d\r\n", g.gyro[0], g.gyro[1], g.gyro[2],
 					xm.accel[0], xm.accel[1], xm.accel[2], xm.mag[0], xm.mag[1], xm.mag[2]);
 
-#ifdef NINEDOF_DEBUG
 			debug_output_counter++;
 			if (debug_output_counter >= 25){
 	            PRINTF(data_send_buffer);
 				debug_output_counter = 0;
 			}
 #endif
-			UART_WriteBlocking(TK1_UART, data_send_buffer, strlen(data_send_buffer));
+
+			data_send_buffer[0] = 0xDE;
+			data_send_buffer[1] = 0xAD;
+			data_send_buffer[2] = 0xBE;
+			data_send_buffer[3] = 0xEF;
+
+			memcpy(data_send_buffer+4, g.gyro, 6);
+			memcpy(data_send_buffer+10, xm.accel, 6);
+			memcpy(data_send_buffer+16, xm.mag, 6);
+
+			UART_WriteBlocking(TK1_UART, data_send_buffer, 22);
 
 		}
 

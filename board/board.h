@@ -66,9 +66,9 @@ extern gpioHandleKSDK_t GPIO_PTA8;
 extern gpioHandleKSDK_t GPIO_PTA9;
 extern gpioHandleKSDK_t GPIO_PTA1;
 
-//#define GPIO_DEBUG_1 GPIO_PTA27
-//#define GPIO_DEBUG_2 GPIO_PTA26
-//#define GPIO_DEBUG_3 GPIO_PTA4
+#define GPIO_DEBUG_1 GPIO_PTA27
+#define GPIO_DEBUG_2 GPIO_PTA26
+#define GPIO_DEBUG_3 GPIO_PTA4
 
 // Header 4 Row 2 GPIO
 extern gpioHandleKSDK_t GPIO_PTA25;
