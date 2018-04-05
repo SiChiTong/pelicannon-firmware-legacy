@@ -33,6 +33,7 @@
 
 #include "pelicannon-k66f-firmware.h"
 #include "ninedof.h"
+#include "tk1.h"
 
 void NineDoF_Init();
 
@@ -40,6 +41,9 @@ void NineDoF_Init();
 #define NINEDOF_EVENT_XM (1<<0)
 #define NINEDOF_EVENT_G (1<<1)
 EventGroupHandle_t ninedof_event_group = NULL;
+
+static SemaphoreHandle_t ninedof_data_mutex = NULL;
+
 
 /* Device Handles */
 /* Accelerometer/magnometer use the same I2C bus as gyrometer */
@@ -138,6 +142,8 @@ void NineDoF_Init(){
     /* Create event groups */
     ninedof_event_group = xEventGroupCreate();
 
+	ninedof_data_mutex = xSemaphoreCreateMutex();
+
     /* Setup Interupts */
     GENERIC_DRIVER_GPIO *gpioDriver = &Driver_GPIO_KSDK;
 
@@ -210,6 +216,17 @@ void NineDoF_Init(){
 
 }
 
+static fxas21002_gyrodata_t ninedof_data_G;
+static fxos8700_accelmagdata_t ninedof_data_XM;
+
+
+void Ninedof_CopyData(fxas21002_gyrodata_t* g, fxos8700_accelmagdata_t* xm){
+	xSemaphoreTake(ninedof_data_mutex, portMAX_DELAY);
+	memcpy(&ninedof_data_G, g, sizeof(ninedof_data_G));
+	memcpy(&ninedof_data_XM, xm, sizeof(ninedof_data_XM));
+	xSemaphoreGive(ninedof_data_mutex);
+}
+
 void Ninedof_Task(void *pvParameters){
 
 	uint32_t flag_xm, flag_g;
@@ -220,9 +237,6 @@ void Ninedof_Task(void *pvParameters){
 
     uint8_t rawData_G[G_DATA_READ_SIZE];
     uint8_t rawData_XM[XM_DATA_READ_SIZE];
-
-    fxas21002_gyrodata_t data_G;
-    fxos8700_accelmagdata_t data_XM;
 
     flag_xm = 0; flag_g = 0;
     for(;;){
@@ -250,7 +264,7 @@ void Ninedof_Task(void *pvParameters){
     		flag_xm = 0;
     		flag_g = 0;
 
-    		//TODO: Notify UART worker
+    		TK1_NineDof_DataReady();
 
 #ifdef GPIO_DEBUG_MODE
     		gpioDriver->write_pin(&GPIO_DEBUG_3, 0);
@@ -279,16 +293,18 @@ void Ninedof_Task(void *pvParameters){
 	            return;
 	        }
 
-	        data_XM.mag[0] = ((int16_t)rawData_XM[0] << 8) | rawData_XM[1];
-	        data_XM.mag[1] = ((int16_t)rawData_XM[2] << 8) | rawData_XM[3];
-	        data_XM.mag[2] = ((int16_t)rawData_XM[4] << 8) | rawData_XM[5];
+	    	xSemaphoreTake(ninedof_data_mutex, portMAX_DELAY);
+	        ninedof_data_XM.mag[0] = ((int16_t)rawData_XM[0] << 8) | rawData_XM[1];
+	        ninedof_data_XM.mag[1] = ((int16_t)rawData_XM[2] << 8) | rawData_XM[3];
+	        ninedof_data_XM.mag[2] = ((int16_t)rawData_XM[4] << 8) | rawData_XM[5];
 
-	        data_XM.accel[0] = ((int16_t)rawData_XM[6] << 8) | rawData_XM[7];
-	        data_XM.accel[0] /= 4;
-	        data_XM.accel[1] = ((int16_t)rawData_XM[8] << 8) | rawData_XM[9];
-	        data_XM.accel[1] /= 4;
-	        data_XM.accel[2] = ((int16_t)rawData_XM[10] << 8) | rawData_XM[11];
-	        data_XM.accel[2] /= 4;
+	        ninedof_data_XM.accel[0] = ((int16_t)rawData_XM[6] << 8) | rawData_XM[7];
+	        ninedof_data_XM.accel[0] /= 4;
+	        ninedof_data_XM.accel[1] = ((int16_t)rawData_XM[8] << 8) | rawData_XM[9];
+	        ninedof_data_XM.accel[1] /= 4;
+	        ninedof_data_XM.accel[2] = ((int16_t)rawData_XM[10] << 8) | rawData_XM[11];
+	        ninedof_data_XM.accel[2] /= 4;
+	    	xSemaphoreGive(ninedof_data_mutex);
 
 		}
 
@@ -303,10 +319,13 @@ void Ninedof_Task(void *pvParameters){
 	            return;
 	        }
 
+	    	xSemaphoreTake(ninedof_data_mutex, portMAX_DELAY);
 	        /*! Convert the raw sensor data to signed 16-bit container for display to the debug port. */
-	        data_G.gyro[0] = ((int16_t)rawData_G[0] << 8) | rawData_G[1];
-	        data_G.gyro[1] = ((int16_t)rawData_G[2] << 8) | rawData_G[3];
-	        data_G.gyro[2] = ((int16_t)rawData_G[4] << 8) | rawData_G[5];
+	        ninedof_data_G.gyro[0] = ((int16_t)rawData_G[0] << 8) | rawData_G[1];
+	        ninedof_data_G.gyro[1] = ((int16_t)rawData_G[2] << 8) | rawData_G[3];
+	        ninedof_data_G.gyro[2] = ((int16_t)rawData_G[4] << 8) | rawData_G[5];
+	    	xSemaphoreGive(ninedof_data_mutex);
+
 		}
 
     }

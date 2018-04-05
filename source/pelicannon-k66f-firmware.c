@@ -76,6 +76,7 @@ int main(void) {
     /* Lower GPIO Port ISR priorities to minimum level below FreeRTOS task level */
     NVIC_SetPriority(PORTA_IRQn, 0x02);
     NVIC_SetPriority(PORTC_IRQn, 0x02);
+    NVIC_SetPriority(TK1_UART_IRQn, 0x02);
 
     /* Initialize functionality groups before starting tasks to avoid race conditions */
     NineDoF_Init();
@@ -88,13 +89,18 @@ int main(void) {
     	while(1);
     }
 
-    if (xTaskCreate(DualHBridge_Task, "DualHBridge_Task", 1024, NULL, configMAX_PRIORITIES-1, 0) != pdPASS){
-    	PRINTF("Failed to create Motor_Task\r\n");
+    if (xTaskCreate(DualHBridge_Task, "DualHBridge_Task", 1024, NULL, configMAX_PRIORITIES-2, 0) != pdPASS){
+    	PRINTF("Failed to create DualHBridge_Task\r\n");
     	while(1);
     }
 
-    if (xTaskCreate(TK1_Task, "TK1_Task", 1024, NULL, configMAX_PRIORITIES-1, 0) != pdPASS){
-    	PRINTF("Failed to create Ninedof_Task\r\n");
+    if (xTaskCreate(TK1_Motor_Task, "TK1_Motor_Task", 1024, NULL, configMAX_PRIORITIES-1, 0) != pdPASS){
+    	PRINTF("Failed to create TK1_Motor_Taskk\r\n");
+    	while(1);
+    }
+
+    if (xTaskCreate(TK1_Ninedof_Task, "TK1_Ninedof_Task", 1024, NULL, configMAX_PRIORITIES-3, 0) != pdPASS){
+    	PRINTF("Failed to create TK1_Ninedof_Task\r\n");
     	while(1);
     }
 

@@ -175,6 +175,22 @@ gpioHandleKSDK_t GPIO_PTC12 = {.base = GPIOC,
                          .clockName = kCLOCK_PortC,
                          .portNumber = PORTC_NUM};
 
+gpioHandleKSDK_t GPIO_PTC8 = {.base = GPIOC,
+                         .portBase = PORTC,
+                         .pinNumber = 8,
+                         .mask = 1 << (0),
+                         .irq = PORTC_IRQn,
+                         .clockName = kCLOCK_PortC,
+                         .portNumber = PORTC_NUM};
+
+gpioHandleKSDK_t GPIO_PTC16 = {.base = GPIOC,
+                         .portBase = PORTC,
+                         .pinNumber = 16,
+                         .mask = 1 << (0),
+                         .irq = PORTC_IRQn,
+                         .clockName = kCLOCK_PortC,
+                         .portNumber = PORTC_NUM};
+
 /*******************************************************************************
  * Code
  ******************************************************************************/

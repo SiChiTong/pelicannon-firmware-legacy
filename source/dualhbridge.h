@@ -13,10 +13,11 @@ void DualHBridge_Init();
 
 int DualHBridge_GetPosition();
 int DualHBridge_StepsLeft();
+
 void DualHBridge_Step(int steps);
 void DualHBridge_Abort();
 
-#define DUALHBRIDGE_STEPS_PER_ROTATION 210
+#define DUALHBRIDGE_STEPS_PER_ROTATION 200
 #define DUALHBRIDGE_RPM 60
 
 
