@@ -50,13 +50,14 @@ void UART1_RX_TX_IRQHandler(void)
 
         //Buffer overrun prevention
         if(tk1_uart_buffer_size == TK1_UART_RX_BUFFER){
+			memset(tk1_uart_buffer, 0, sizeof(tk1_uart_buffer));
         	tk1_uart_buffer_size = 0;
         }
 
         //Store byte
         if (tk1_uart_buffer_size < TK1_UART_RX_BUFFER){
-                	tk1_uart_buffer[tk1_uart_buffer_size] = data;
-                	tk1_uart_buffer_size++;
+			tk1_uart_buffer[tk1_uart_buffer_size] = data;
+			tk1_uart_buffer_size++;
         }
 
         //End of command marker
@@ -165,14 +166,42 @@ void TK1_Motor_Task(void *pvParameters){
 
 		if (event_set & TK1_EVENT_MOTOR_CMD){
 
-			if(strcmp(tk1_uart_buffer, "l;") == 0){
-				DualHBridge_Step(-DUALHBRIDGE_STEPS_PER_ROTATION);
-			}else if(strcmp(tk1_uart_buffer, "r;") == 0){
-				DualHBridge_Step(DUALHBRIDGE_STEPS_PER_ROTATION);
-			}else if(strcmp(tk1_uart_buffer, "s;") == 0){
-				DualHBridge_Abort();
+			switch(tk1_uart_buffer[0]){
+
+			/*
+			 * Step Command
+			 * Message Format: S:+-123;
+			 * Where +-123 is the number of steps
+			 */
+			case 'S':
+				if(tk1_uart_buffer[1] != ':')
+					break;
+
+				//Scan for end
+				for(int i=2; i < sizeof(tk1_uart_buffer); i++){
+					if (tk1_uart_buffer[i] == ';'){
+						//Null terminate for atoi
+						tk1_uart_buffer[i] = 0x00;
+						int steps = atoi(&tk1_uart_buffer[2]);
+						DualHBridge_Step(steps);
+						break;
+					}
+				}
+
+				break;
+
+			/*
+			 * Abort Command
+			 * Message Format: A;
+			 */
+			case 'A':
+				if (tk1_uart_buffer[1] == ';')
+					DualHBridge_Abort();
+				break;
 			}
 
+			//Clear the UART Buffer
+			memset(tk1_uart_buffer, 0, sizeof(tk1_uart_buffer));
 			tk1_uart_buffer_size = 0;
 		}
 

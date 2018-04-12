@@ -76,6 +76,8 @@ int main(void) {
     /* Lower GPIO Port ISR priorities to minimum level below FreeRTOS task level */
     NVIC_SetPriority(PORTA_IRQn, 0x02);
     NVIC_SetPriority(PORTC_IRQn, 0x02);
+
+    //UART1_RX_TX_IRQn
     NVIC_SetPriority(TK1_UART_IRQn, 0x02);
 
     /* Initialize functionality groups before starting tasks to avoid race conditions */
