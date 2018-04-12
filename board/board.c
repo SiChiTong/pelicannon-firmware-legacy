@@ -32,6 +32,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * @file	board.c
+ * @brief	Contains board specific definitions and mappings of GPIOs and other hardware blocks
+ */
 #include <stdint.h>
 #include "fsl_device_registers.h"
 #include "board.h"
@@ -43,7 +47,6 @@
  * Variables
  ******************************************************************************/
 
-// Mag/Accel & Gyro Interrupt GPIO
 gpioHandleKSDK_t GPIO_PTA29 = {.base = GPIOA,
                          .portBase = PORTA,
                          .pinNumber = 29,

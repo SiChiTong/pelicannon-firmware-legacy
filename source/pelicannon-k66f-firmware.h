@@ -10,21 +10,50 @@
 
 #include "board.h"
 #include "fsl_i2c_cmsis.h"
+#include "fsl_debug_console.h"
 
-#define XM_I2C_ADDRESS 0x1D
-#define XM_I2C_DEVICE Driver_I2C0
-#define XM_I2C_EVENT I2C0_SignalEvent_t
-#define XM_I2C_INDEX 0
+/**
+ * Enables and muxes the Debug UART
+ * Breakpointable application global assert
+ */
+#define DEVELOPMENT 1
 
-#define GYRO_I2C_ADDRESS 0x21
-#define GYRO_I2C_DEVICE Driver_I2C0
-#define GYRO_I2C_EVENT I2C0_SignalEvent_t
-#define GYRO_I2C_INDEX 0
+/* Development sub settings */
 
-//#define GPIO_DEBUG_MODE
-//#define MOTOR_TEST
-//#define NINEDOF_DEBUG
+/*! @brief	Drives GPIOs so an oscilloscope or logic analyzer can view jitter in the ninedof data synchronization*/
+#define NINEDOF_GPIO_DEBUG_TIMING 0
+/*! @brief	Endlessly drives the motor forwards and backwards*/
+#define MOTOR_TEST 0
+/*! @brief	Outputs every 25 samples from the accelerometer/gyrometer/magnetmometer to the debug UART*/
+#define NINEDOF_DEBUG_VALUES 0
 
-#define ASSERT(x) if((x) == 0) {for (;;);}
+/* Stepper motor settings */
+/**
+ * @brief	Stepper motor steps per rotation
+ * Step this many steps left or right to move 2*pi or 360 degrees
+ */
+#define STEPPER_MOTOR_STEPS_PER_ROTATION 200
+/*! @brief	Speed at which the stepper motor is driven in rotations per minute*/
+#define STEPPER_MOTOR_RPM 60
+
+/* Preprocessor safety check */
+#if !DEVELOPMENT && (GPIO_DEBUG_MODE || MOTOR_TEST || NINEDOF_GPIO_DEBUG_TIMING)
+#error "Invalid settings for production mode"
+#endif
+
+#if DEVELOPMENT
+#define DPRINTF PRINTF
+#else
+#define DPRINTF(format, args...) ((void)0)
+#endif
+
+#if DEVELOPMENT
+void application_assert(int);
+#else
+inline void application_assert(int);
+#endif
+
+#define ASSERT(x) application_assert(x)
+
 
 #endif /* PELICANNON_K66F_FIRMWARE_H_ */

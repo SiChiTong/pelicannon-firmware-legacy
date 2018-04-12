@@ -67,6 +67,10 @@
     1 tab == 4 spaces!
 */
 
+/**
+ * @file FreeRTOSConfig.h
+ * @brief FreeRTOS Configuration Header
+ */
 #ifndef FREERTOS_CONFIG_H
 #define FREERTOS_CONFIG_H
 

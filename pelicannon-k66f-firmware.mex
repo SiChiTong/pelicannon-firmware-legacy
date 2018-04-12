@@ -19,25 +19,25 @@
             <processor_version>3.0.1</processor_version>
          </pins_profile>
          <functions_list>
-            <function name="BOARD_InitPins">
+            <function name="DebugUART_InitPins">
                <description>Configures pin routing and optionally pin electrical features.&amp;lt;br/&amp;gt;</description>
                <options>
-                  <callFromInitBoot>true</callFromInitBoot>
+                  <callFromInitBoot>false</callFromInitBoot>
                   <coreID>core0</coreID>
                   <enableClock>true</enableClock>
                </options>
                <dependencies>
-                  <dependency resourceType="Peripheral" resourceId="UART0" description="Peripheral UART0 is not initialized" problem_level="1" source="Pins: BOARD_InitPins">
+                  <dependency resourceType="Peripheral" resourceId="UART0" description="Peripheral UART0 is not initialized" problem_level="1" source="Pins: DebugUART_InitPins">
                      <feature name="initialized" evaluation="">
                         <data>true</data>
                      </feature>
                   </dependency>
-                  <dependency resourceType="SWComponent" resourceId="platform.drivers.common" description="Pins initialization requires the COMMON Driver in the project." problem_level="2" source="Pins.BOARD_InitPins">
+                  <dependency resourceType="SWComponent" resourceId="platform.drivers.common" description="Pins initialization requires the COMMON Driver in the project." problem_level="2" source="Pins.DebugUART_InitPins">
                      <feature name="enabled" evaluation="equal" configuration="core0">
                         <data>true</data>
                      </feature>
                   </dependency>
-                  <dependency resourceType="SWComponent" resourceId="platform.drivers.port" description="Pins initialization requires the PORT Driver in the project." problem_level="2" source="Pins.BOARD_InitPins">
+                  <dependency resourceType="SWComponent" resourceId="platform.drivers.port" description="Pins initialization requires the PORT Driver in the project." problem_level="2" source="Pins.DebugUART_InitPins">
                      <feature name="enabled" evaluation="equal" configuration="core0">
                         <data>true</data>
                      </feature>

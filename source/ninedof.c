@@ -1,10 +1,8 @@
-/*
- * ninedof.c
- *
- *  Created on: Mar 25, 2018
- *      Author: cvance
+/**
+ * @file	ninedof.c
+ * @author	Carroll Vance
+ * @brief	Initializes and synchronizes reads FXOS8700 and FXAS21002 sensors using data ready interupts
  */
-
 #include <stdio.h>
 #include "board.h"
 #include "peripherals.h"
@@ -40,18 +38,23 @@ void NineDoF_Init();
 /* Synchronization Primitives */
 #define NINEDOF_EVENT_XM (1<<0)
 #define NINEDOF_EVENT_G (1<<1)
-EventGroupHandle_t ninedof_event_group = NULL;
-
+/*! @brief	Used to wake Ninedof_Task when new data is available*/
+static EventGroupHandle_t ninedof_event_group = NULL;
+/*! @brief	Locks access to the current sensor readings*/
 static SemaphoreHandle_t ninedof_data_mutex = NULL;
 
+/*! @brief	Locks access to the current sensor readings*/
+static ARM_DRIVER_I2C *NineDoF_I2Cdrv = &G_I2C_DEVICE;
 
-/* Device Handles */
 /* Accelerometer/magnometer use the same I2C bus as gyrometer */
-ARM_DRIVER_I2C *I2Cdrv = &GYRO_I2C_DEVICE;
-fxas21002_i2c_sensorhandle_t fxas21002Driver;
-fxos8700_i2c_sensorhandle_t fxos8700Driver;
+/*! @brief	FXAS21002 Gyroscope I2C Driver*/
+static fxas21002_i2c_sensorhandle_t fxas21002Driver;
+/*! @brief	FXOS8700 Accelerometer/Magnetometer I2C Driver*/
+static fxos8700_i2c_sensorhandle_t fxos8700Driver;
 
 /* Device Configuration */
+
+/*! @brief	FXOS8700 Initialization Registers*/
 const registerwritelist_t fxos8700_Config_ISR[] = {
     /*! System and Control registers. */
     /*! Configure the FXOS8700 to 100Hz sampling rate. */
@@ -65,7 +68,7 @@ const registerwritelist_t fxos8700_Config_ISR[] = {
     {FXOS8700_M_CTRL_REG2, FXOS8700_M_CTRL_REG2_M_AUTOINC_HYBRID_MODE, FXOS8700_M_CTRL_REG2_M_AUTOINC_MASK},
     __END_WRITE_DATA__};
 
-/*! Prepare the register write list to configure FXAS21002 in non-FIFO mode. */
+/*! @brief	FXAS21002 Initialization Registers*/
 const registerwritelist_t fxas21002_Config_ISR[] = {
     /*! Configure CTRL_REG1 register to put FXAS21002 to 100Hz sampling rate. */
     {FXAS21002_CTRL_REG1, FXAS21002_CTRL_REG1_DR_100HZ, FXAS21002_CTRL_REG1_DR_MASK},
@@ -75,24 +78,31 @@ const registerwritelist_t fxas21002_Config_ISR[] = {
      FXAS21002_CTRL_REG2_IPOL_MASK | FXAS21002_CTRL_REG2_INT_EN_DRDY_MASK | FXAS21002_CTRL_REG2_INT_CFG_DRDY_MASK},
     __END_WRITE_DATA__};
 
-/*! Command definition to read the Accel and Mag Data */
 #define XM_DATA_READ_SIZE 12
+/*! @brief	FXOS8700 I2C Read Sequence*/
 const registerreadlist_t fxos8700_Read[] = {{.readFrom = FXOS8700_OUT_X_MSB, .numBytes = XM_DATA_READ_SIZE},
                                                   __END_READ_DATA__};
 
-
-/*! Prepare the register read list to read the raw gyro data from the FXAS21002. */
 #define G_DATA_READ_SIZE 6
+/*! @brief	FXAS21002 I2C Read Sequence*/
 const registerreadlist_t fxas21002_Read[] = {
     {.readFrom = FXAS21002_OUT_X_MSB, .numBytes = G_DATA_READ_SIZE}, __END_READ_DATA__};
+
+/*! @brief	FXAS21002 I2C Status Sequence*/
 const registerreadlist_t fxas21002_Status[] = {
   {.readFrom = FXAS21002_STATUS, .numBytes = 1}, __END_READ_DATA__};
 
 /* ISR Routines */
+
+/**
+ * @brief	Handle ISR from FXAS21002
+ * @usage	Should only be called by the NVIC driver
+ * @param	pUserData Unused
+ */
 void FXAS21002_ISR(void *pUserData){
     BaseType_t xHigherPriorityTaskWoken, xResult;
 
-#ifdef GPIO_DEBUG_MODE
+#if GPIO_DEBUG_MODE
     GENERIC_DRIVER_GPIO *gpioDriver = &Driver_GPIO_KSDK;
 
     gpioDriver->write_pin(&GPIO_DEBUG_1, 1);
@@ -114,10 +124,15 @@ void FXAS21002_ISR(void *pUserData){
 
 }
 
+/**
+ * @brief	Handle ISR from FXOS8700
+ * @usage	Should only be called by the NVIC driver
+ * @param	pUserData Unused
+ */
 void FXOS8700_ISR(void *pUserData){
     BaseType_t xHigherPriorityTaskWoken, xResult;
 
-#ifdef GPIO_DEBUG_MODE
+#if GPIO_DEBUG_MODE
     GENERIC_DRIVER_GPIO *gpioDriver = &Driver_GPIO_KSDK;
 
     gpioDriver->write_pin(&GPIO_DEBUG_2, 1);
@@ -137,6 +152,10 @@ void FXOS8700_ISR(void *pUserData){
 
 }
 
+/**
+ * @brief	Initialize the NineDoF functionality group
+ * @usage	Should only be called by the application entry point
+ */
 void NineDoF_Init(){
     int32_t status;
 
@@ -151,42 +170,42 @@ void NineDoF_Init(){
     gpioDriver->pin_init(&FXAS21002_INT1, GPIO_DIRECTION_IN, NULL, &FXAS21002_ISR, NULL);
     gpioDriver->pin_init(&FXOS8700_INT2, GPIO_DIRECTION_IN, NULL, &FXOS8700_ISR, NULL);
 
-#ifdef GPIO_DEBUG_MODE
+#if GPIO_DEBUG_MODE
     gpioDriver->pin_init(&GPIO_DEBUG_1, GPIO_DIRECTION_OUT, NULL, NULL, NULL);
     gpioDriver->pin_init(&GPIO_DEBUG_2, GPIO_DIRECTION_OUT, NULL, NULL, NULL);
     gpioDriver->pin_init(&GPIO_DEBUG_3, GPIO_DIRECTION_OUT, NULL, NULL, NULL);
 #endif
 
     /*! Initialize the I2C driver. */
-    status = I2Cdrv->Initialize(I2C0_SignalEvent_t);
+    status = NineDoF_I2Cdrv->Initialize(I2C0_SignalEvent_t);
     if (ARM_DRIVER_OK != status)
     {
-        PRINTF("I2C Initialization Failed\r\n");
+        DPRINTF("I2C Initialization Failed\r\n");
         return;
     }
 
     /*! Set the I2C Power mode. */
-    status = I2Cdrv->PowerControl(ARM_POWER_FULL);
+    status = NineDoF_I2Cdrv->PowerControl(ARM_POWER_FULL);
     if (ARM_DRIVER_OK != status)
     {
-        PRINTF("I2C Power Mode setting Failed\r\n");
+        DPRINTF("I2C Power Mode setting Failed\r\n");
         return;
     }
 
     /*! Set the I2C bus speed. */
-    status = I2Cdrv->Control(ARM_I2C_BUS_SPEED, ARM_I2C_BUS_SPEED_FAST);
+    status = NineDoF_I2Cdrv->Control(ARM_I2C_BUS_SPEED, ARM_I2C_BUS_SPEED_FAST);
     if (ARM_DRIVER_OK != status)
     {
-        PRINTF("I2C Control Mode setting Failed\r\n");
+        DPRINTF("I2C Control Mode setting Failed\r\n");
         return;
     }
 
     /*! Initialize the FXAS21002 sensor driver. */
-    status = FXAS21002_I2C_Initialize(&fxas21002Driver, &GYRO_I2C_DEVICE, GYRO_I2C_INDEX, GYRO_I2C_ADDRESS,
+    status = FXAS21002_I2C_Initialize(&fxas21002Driver, &G_I2C_DEVICE, G_I2C_INDEX, G_I2C_ADDRESS,
                                       FXAS21002_WHO_AM_I_WHOAMI_PROD_VALUE);
     if (SENSOR_ERROR_NONE != status)
     {
-        PRINTF("FXAS21002 Initialization Failed\r\n");
+        DPRINTF("FXAS21002 Initialization Failed\r\n");
         return;
     }
 
@@ -194,7 +213,7 @@ void NineDoF_Init(){
     status = FXAS21002_I2C_Configure(&fxas21002Driver, fxas21002_Config_ISR);
     if (SENSOR_ERROR_NONE != status)
     {
-        PRINTF("FXAS21002 Sensor Configuration Failed, Err = %d\r\n", status);
+        DPRINTF("FXAS21002 Sensor Configuration Failed, Err = %d\r\n", status);
         return;
     }
 
@@ -203,7 +222,7 @@ void NineDoF_Init(){
                                      FXOS8700_WHO_AM_I_PROD_VALUE);
     if (SENSOR_ERROR_NONE != status)
     {
-        PRINTF("FXOS8700 Initialization Failed\r\n");
+        DPRINTF("FXOS8700 Initialization Failed\r\n");
         return;
     }
 
@@ -211,16 +230,23 @@ void NineDoF_Init(){
     status = FXOS8700_I2C_Configure(&fxos8700Driver, fxos8700_Config_ISR);
     if (SENSOR_ERROR_NONE != status)
     {
-        PRINTF("FXOS8700 Sensor Configuration Failed, Err = %d\r\n", status);
+        DPRINTF("FXOS8700 Sensor Configuration Failed, Err = %d\r\n", status);
         return;
     }
 
 }
 
+/*!@brief	Stores the latest gyrometer data from the FXAS21002*/
 static fxas21002_gyrodata_t ninedof_data_G;
+/*!@brief	Stores the latest accelerometer/magnetometer data from the FXOS8700*/
 static fxos8700_accelmagdata_t ninedof_data_XM;
 
-
+/**
+ * @brief	Copy the current Ninedof data to another location
+ * @usage	Can be called by any task
+ * @param	g	Pointer to a fxas21002_gyrodata_t structure which will receive the latest data from the FXAS21002
+ * @param 	m	Pointer to a fxos8700_accelmagdata_t structure which will receive the latest data from the FXOS8700
+ */
 void Ninedof_CopyData(fxas21002_gyrodata_t* g, fxos8700_accelmagdata_t* xm){
 	xSemaphoreTake(ninedof_data_mutex, portMAX_DELAY);
 	memcpy(g, &ninedof_data_G, sizeof(ninedof_data_G));
@@ -228,6 +254,12 @@ void Ninedof_CopyData(fxas21002_gyrodata_t* g, fxos8700_accelmagdata_t* xm){
 	xSemaphoreGive(ninedof_data_mutex);
 }
 
+/**
+ * @brief	Synchronizes reads to the NineDoF sensors based on data ready events
+ * @usage	Called by FreeRTOS after xTaskCreate
+ * @param 	vParameters	Unused
+ * Tells the TK1 module that data is ready to send
+ */
 void Ninedof_Task(void *pvParameters){
 
 	uint32_t flag_xm, flag_g;
@@ -242,7 +274,7 @@ void Ninedof_Task(void *pvParameters){
     flag_xm = 0; flag_g = 0;
     for(;;){
 
-#ifdef GPIO_DEBUG_MODE
+#if GPIO_DEBUG_MODE
     	GENERIC_DRIVER_GPIO *gpioDriver = &Driver_GPIO_KSDK;
 
 		if (gpioDriver->read_pin(&FXOS8700_INT2))
@@ -258,7 +290,7 @@ void Ninedof_Task(void *pvParameters){
 
     	if (flag_xm && flag_g){
 
-#ifdef GPIO_DEBUG_MODE
+#if GPIO_DEBUG_MODE
     	    gpioDriver->write_pin(&GPIO_DEBUG_3, 1);
 #endif
 
@@ -267,7 +299,7 @@ void Ninedof_Task(void *pvParameters){
 
     		TK1_NineDof_DataReady();
 
-#ifdef GPIO_DEBUG_MODE
+#if GPIO_DEBUG_MODE
     		gpioDriver->write_pin(&GPIO_DEBUG_3, 0);
 #endif
 
@@ -302,7 +334,7 @@ void Ninedof_Task(void *pvParameters){
 	        status = FXOS8700_I2C_ReadData(&fxos8700Driver, fxos8700_Read, rawData_XM);
 	        if (ARM_DRIVER_OK != status)
 	        {
-	            PRINTF("FXOS8700 Read Failed.\r\n");
+	            DPRINTF("FXOS8700 Read Failed.\r\n");
 	            return;
 	        }
 
@@ -327,7 +359,7 @@ void Ninedof_Task(void *pvParameters){
 	        status = FXAS21002_I2C_ReadData(&fxas21002Driver, fxas21002_Read, rawData_G);
 	        if (ARM_DRIVER_OK != status)
 	        {
-	            PRINTF("FXAS21002 Read Failed.\r\n");
+	            DPRINTF("FXAS21002 Read Failed.\r\n");
 	            return;
 	        }
 

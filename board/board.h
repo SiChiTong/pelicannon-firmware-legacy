@@ -45,6 +45,27 @@
 #include "gpio_driver.h"
 #include "pin_mux.h"
 
+/*******************************************************************************
+ * Definitions
+ ******************************************************************************/
+
+/*! @brief The board name */
+#define BOARD_NAME "FRDM-K66F"
+
+/* I2C */
+
+#define XM_I2C_ADDRESS 0x1D
+#define XM_I2C_DEVICE Driver_I2C0
+#define XM_I2C_EVENT I2C0_SignalEvent_t
+#define XM_I2C_INDEX 0
+
+#define G_I2C_ADDRESS 0x21
+#define G_I2C_DEVICE Driver_I2C0
+#define G_I2C_EVENT I2C0_SignalEvent_t
+#define G_I2C_INDEX 0
+
+/* GPIOs */
+
 // Mag/Accel & Gyro Interrupt GPIO
 extern gpioHandleKSDK_t GPIO_PTA29;
 extern gpioHandleKSDK_t GPIO_PTA28;
@@ -87,13 +108,6 @@ uint32_t I2C0_GetFreq(void);
 void I2C0_InitPins(void);
 void I2C0_DeinitPins(void);
 
-/*******************************************************************************
- * Definitions
- ******************************************************************************/
-
-/*! @brief The board name */
-#define BOARD_NAME "FRDM-K66F"
-
 /*! @brief The UART to use for debug messages. */
 #define BOARD_DEBUG_UART_TYPE DEBUG_CONSOLE_DEVICE_TYPE_UART
 #define BOARD_DEBUG_UART_BASEADDR (uint32_t) UART0
@@ -106,8 +120,6 @@ void I2C0_DeinitPins(void);
 #ifndef BOARD_DEBUG_UART_BAUDRATE
 #define BOARD_DEBUG_UART_BAUDRATE 115200
 #endif /* BOARD_DEBUG_UART_BAUDRATE */
-
-#define BOARD_ACCEL_I2C_BASE I2C0
 
 /*! @brief The CAN instance used for board. */
 #define BOARD_CAN_BASEADDR CAN0
@@ -125,12 +137,6 @@ void I2C0_DeinitPins(void);
 #define BOARD_FTM_PERIOD_HZ 100
 #define BOARD_FTM_IRQ_HANDLER FTM0_IRQHandler
 #define BOARD_FTM_IRQ_VECTOR FTM0_IRQn
-
-/*! @brief The bubble level demo information */
-#define BOARD_FXOS8700_ADDR 0x1D
-#define BOARD_ACCEL_ADDR BOARD_FXOS8700_ADDR
-#define BOARD_ACCEL_BAUDRATE 100
-#define BOARD_ACCEL_I2C_BASEADDR I2C0
 
 /*! @brief The Enet instance used for board */
 #define BOARD_ENET_BASEADDR ENET

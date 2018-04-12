@@ -1,8 +1,7 @@
-/*
- * tests.c
- *
- *  Created on: Mar 26, 2018
- *      Author: cvance
+/**
+ * @file	tests.c
+ * @author	Carroll Vance
+ * @brief	Tests for various hardware components
  */
 
 /* FreeRTOS Includes */
@@ -21,12 +20,17 @@
 
 #include "tests.h"
 
-#ifdef MOTOR_TEST
+#if MOTOR_TEST
+/**
+ * @brief Loops the motor through full rotations positive and negative
+ * @usage Called by FreeRTOS after xTaskCreate
+ * @param pvParam Unused
+ */
 void Motor_Test_Task(void* pvParam){
 	for(;;){
-		DualHBridge_Step(200);
+		DualHBridge_Step(DUALHBRIDGE_STEPS_PER_ROTATION);
 		vTaskDelay(2000 / portTICK_PERIOD_MS);
-		DualHBridge_Step(-200);
+		DualHBridge_Step(-DUALHBRIDGE_STEPS_PER_ROTATION);
 		vTaskDelay(2000 / portTICK_PERIOD_MS);
 	}
 }

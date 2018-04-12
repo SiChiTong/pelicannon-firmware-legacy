@@ -1,11 +1,10 @@
-/*
- * tk1.c
- *
- *  Created on: Mar 25, 2018
- *      Author: cvance
+/**
+ * @file	tk1.c
+ * @author	Carroll Vance
+ * @brief	Jetson TK1 Communication Module
  */
-
 #include <stdio.h>
+#include <stdlib.h>
 #include "board.h"
 #include "peripherals.h"
 #include "pin_mux.h"
@@ -30,14 +29,21 @@
 
 /* Synchronization Primitives */
 #define TK1_EVENT_MOTOR_CMD (1<<0)
+/*! @brief	Event which is set on new motor comands being received*/
 static EventGroupHandle_t tk1_motor_event_group = NULL;
 #define TK1_EVENT_9DOF_DRDY (1<<0)
+/*! @brief	Event which is set on new ninedof data being ready*/
 static EventGroupHandle_t tk1_ninedof_event_group = NULL;
 
-
+/*! @brief	Amount of data in tk1_uart_buffer*/
 static volatile int tk1_uart_buffer_size = 0;
+/*! @brief Buffers received data from the TK1 UART*/
 static char tk1_uart_buffer[TK1_UART_RX_BUFFER];
 
+/**
+ * @brief Handles IRQ from UART1 triggered by RX from TK1 sending us motor commands
+ * @usage Should only be called by the NVIC driver
+ */
 void UART1_RX_TX_IRQHandler(void)
 {
     BaseType_t xHigherPriorityTaskWoken, xResult;
@@ -81,7 +87,10 @@ void UART1_RX_TX_IRQHandler(void)
     }
 }
 
-
+/**
+ * @brief Initializes the TK1 functional group
+ * @usage Should only be called by the application entry point
+ */
 void TK1_Init(){
     uart_config_t config;
 
@@ -101,12 +110,21 @@ void TK1_Init(){
 
 }
 
+/**
+ * @brief Called whenever new mag/gyro/accel data is available
+ * @usage Should only be called by Ninedof_Task in ninedof.c
+ */
 void TK1_NineDof_DataReady(){
 	xEventGroupSetBits(tk1_ninedof_event_group, TK1_EVENT_9DOF_DRDY);
 }
 
+/**
+ * @brief When new mag/gyro/accel data is recieved send it via UART to the TK1
+ * @usage Called by FreeRTOS after xTaskCreate
+ * @param pvParameters Unused
+ */
 void TK1_Ninedof_Task(void *pvParameters){
-#ifdef NINEDOF_DEBUG
+#if NINEDOF_GPIO_DEBUG_TIMING
 	int debug_output_counter = 0;
 #endif
 	fxas21002_gyrodata_t g;
@@ -126,7 +144,7 @@ void TK1_Ninedof_Task(void *pvParameters){
 
 
 
-#ifdef NINEDOF_DEBUG
+#if NINEDOF_GPIO_DEBUG_TIMING
 			sprintf(data_send_buffer, "G:%d,%d,%d\r\nA:%d,%d,%d\r\nM:%d,%d,%d\r\n", g.gyro[0], g.gyro[1], g.gyro[2],
 					xm.accel[0], xm.accel[1], xm.accel[2], xm.mag[0], xm.mag[1], xm.mag[2]);
 
@@ -153,6 +171,11 @@ void TK1_Ninedof_Task(void *pvParameters){
 	}
 }
 
+/**
+ * @brief Handles motor commands from the TK1
+ * @usage Called by FreeRTOS after xTaskCreate
+ * @param pvParameters Unused
+ */
 void TK1_Motor_Task(void *pvParameters){
 
     EventBits_t event_set;

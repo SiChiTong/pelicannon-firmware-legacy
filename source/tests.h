@@ -10,7 +10,7 @@
 
 #include "pelicannon-k66f-firmware.h"
 
-#ifdef MOTOR_TEST
+#if MOTOR_TEST
 void Motor_Test_Task(void* pvParam);
 #endif
 

@@ -1,10 +1,8 @@
-/*
- * dualhbridge.c
- *
- *  Created on: Mar 25, 2018
- *      Author: cvance
+/**
+ * @file	dualhbridge.c
+ * @author	Carroll Vance
+ * @brief	Controls dual h-bridge to drive a stepper motor using four GPIOs
  */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -27,21 +25,33 @@
 #include "dualhbridge.h"
 
 /* Synchronization Primitives */
+/*!@brief	Wakes up the DualHBridge_Task when stepping is needed*/
 #define DUALHBRIDGE_EVENT_WAKEUP (1<<0)
+/*! @brief	Set target position to the current one, stopping the motor*/
 #define DUALHBRIDGE_EVENT_ABORT (1<<1)
 
+/*! @brief	Event used to wake the motor task to new commands*/
 static EventGroupHandle_t dualhbridge_event_group = NULL;
+/*! @brief	Locks access to step variables between tasks*/
 static SemaphoreHandle_t dualhbridge_data_mutex = NULL;
 
 /* Variables */
+/*! @brief	Step target relative to initialized zero position*/
 static int dualhbridge_target_steps = 0;
+/*! @brief	Current number of steps from initialized zero position*/
 static int dualhbridge_current_steps = 0;
+/*! @brief	Delay in ticks between each step*/
 static TickType_t dualhbridge_stepdelay;
 
+/**
+ * @brief	Sets the RPM of the motor
+ * @usage	Can be called from any task
+ * @param	RPM Rotations Per Minute
+ */
 void DualHBridge_SetRPM(int RPM){
 	xSemaphoreTake(dualhbridge_data_mutex, portMAX_DELAY);
 
-	float steps_per_ms = (RPM * DUALHBRIDGE_STEPS_PER_ROTATION) / (60.0 * 1000.0);
+	float steps_per_ms = (RPM * STEPPER_MOTOR_STEPS_PER_ROTATION) / (60.0 * 1000.0);
 	float steps_ms_delay = (1.0 / steps_per_ms);
 
 	dualhbridge_stepdelay = (TickType_t) (ceil(steps_ms_delay / portTICK_PERIOD_MS));
@@ -51,10 +61,20 @@ void DualHBridge_SetRPM(int RPM){
 	xSemaphoreGive(dualhbridge_data_mutex);
 }
 
+/**
+ * @brief	Gets the current position in steps relative to initialized zero position
+ * @usage	Can be called from any task
+ * @return	Returns the number of steps from the initialized zero position
+ */
 int DualHBridge_GetPosition(){
 	return dualhbridge_current_steps;
 }
 
+/**
+ * @brief	Gets the number of steps left to turn
+ * @usage	Can be called from any task
+ * @return	Returns the number of steps left to complete
+ */
 int DualHBridge_StepsLeft(){
 	xSemaphoreTake(dualhbridge_data_mutex, portMAX_DELAY);
 	int steps_left = dualhbridge_target_steps - dualhbridge_current_steps;
@@ -62,6 +82,11 @@ int DualHBridge_StepsLeft(){
 	return steps_left;
 }
 
+/**
+ * @brief	Steps the motor positive or negative steps
+ * @usage	Can be called from any task
+ * @param	steps Number of steps to move
+ */
 void DualHBridge_Step(int steps){
 	xSemaphoreTake(dualhbridge_data_mutex, portMAX_DELAY);
 	dualhbridge_target_steps += steps;
@@ -70,6 +95,10 @@ void DualHBridge_Step(int steps){
 	xEventGroupSetBits(dualhbridge_event_group, DUALHBRIDGE_EVENT_WAKEUP);
 }
 
+/**
+ * @brief	Stops the motor from moving after the current step completes
+ * @usage	Can be called from any task
+ */
 void DualHBridge_Abort(){
 	xEventGroupSetBits(dualhbridge_event_group, DUALHBRIDGE_EVENT_ABORT);
 
@@ -78,6 +107,10 @@ void DualHBridge_Abort(){
 	xSemaphoreGive(dualhbridge_data_mutex);
 }
 
+/**
+ * @brief	Initialize the dual h-bridge functionality group
+ * @usage	Should only be called from application entry point
+ */
 void DualHBridge_Init(){
 
 	dualhbridge_event_group = xEventGroupCreate();
@@ -91,15 +124,19 @@ void DualHBridge_Init(){
     gpioDriver->pin_init(&GPIO_MOTOR_B1, GPIO_DIRECTION_OUT, NULL, NULL, NULL);
     gpioDriver->pin_init(&GPIO_MOTOR_B2, GPIO_DIRECTION_OUT, NULL, NULL, NULL);
 
-	DualHBridge_SetRPM(DUALHBRIDGE_RPM);
+	DualHBridge_SetRPM(STEPPER_MOTOR_RPM);
 
 }
 
-
-void DualHBridge__Step(int stepNumber){
+/**
+ * @brief	Steps the motor a single step based on the step number
+ * @usage	Should only be called by DualHBridge_Task
+ * @param	step_number Next step number, from 0 to 3
+ */
+void DualHBridge__Step(int step_number){
 	GENERIC_DRIVER_GPIO *gpioDriver = &Driver_GPIO_KSDK;
 
-	switch(stepNumber){
+	switch(step_number){
 	case 0:
 		gpioDriver->write_pin(&GPIO_MOTOR_A1, 1);
 		gpioDriver->write_pin(&GPIO_MOTOR_A2, 0);
@@ -130,6 +167,11 @@ void DualHBridge__Step(int stepNumber){
 	}
 }
 
+/**
+ * @brief	Handles requests to move step the motor
+ * @usage	Created through xTaskCreate
+ * @param	pvParameters Unused
+ */
 void DualHBridge_Task(void *pvParameters){
 
     EventBits_t event_set;
@@ -187,8 +229,6 @@ void DualHBridge_Task(void *pvParameters){
 
 			}
 
-		} else if(event_set & DUALHBRIDGE_EVENT_ABORT){
-			//Eat the event
 		}
 
 	}

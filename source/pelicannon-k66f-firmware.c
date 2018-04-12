@@ -55,9 +55,29 @@
 #include "dualhbridge.h"
 #include "tests.h"
 
+/**
+ * @brief Common point of assertation for debug purposes
+ * @usage Can be called by any task
+ * @param boolean_expression A boolean expression which resolves either to zero or a nonzero number
+ * If boolean_expression is zero, the application either loops forever in development mode or resets in production mode
+ */
+#if DEVELOPMENT
+void application_assert(int boolean_expression){
+#else
+inline void application_assert(int boolean_expression){
+#endif
+	if (!boolean_expression){
+#ifdef DEVELOPMENT
+		DPRINTF("Assertation Failed!\r\n");
+		for(;;) __asm("nop");
+#else
+		NVIC_SystemReset();
+#endif
+	}
+}
 
-/*
- * @brief   Application entry point.
+/**
+ * @brief   Muxes pins, initializes hardware, and starts tasks
  */
 int main(void) {
 
@@ -66,8 +86,11 @@ int main(void) {
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();
 
+#ifdef DEVELOPMENT
   	/* Init FSL debug console. */
+    DebugUART_InitPins();
     BOARD_InitDebugConsole();
+#endif
 
 	NineDoF_InitPins();
 	JetsonTK1_InitPins();
@@ -76,8 +99,6 @@ int main(void) {
     /* Lower GPIO Port ISR priorities to minimum level below FreeRTOS task level */
     NVIC_SetPriority(PORTA_IRQn, 0x02);
     NVIC_SetPriority(PORTC_IRQn, 0x02);
-
-    //UART1_RX_TX_IRQn
     NVIC_SetPriority(TK1_UART_IRQn, 0x02);
 
     /* Initialize functionality groups before starting tasks to avoid race conditions */
@@ -87,35 +108,35 @@ int main(void) {
 
     /* Create tasks */
     if (xTaskCreate(Ninedof_Task, "Ninedof_Task", 1024, NULL, configMAX_PRIORITIES-1, 0) != pdPASS){
-    	PRINTF("Failed to create Ninedof_Task\r\n");
+    	DPRINTF("Failed to create Ninedof_Task\r\n");
     	while(1);
     }
 
     if (xTaskCreate(DualHBridge_Task, "DualHBridge_Task", 1024, NULL, configMAX_PRIORITIES-2, 0) != pdPASS){
-    	PRINTF("Failed to create DualHBridge_Task\r\n");
+    	DPRINTF("Failed to create DualHBridge_Task\r\n");
     	while(1);
     }
 
     if (xTaskCreate(TK1_Motor_Task, "TK1_Motor_Task", 1024, NULL, configMAX_PRIORITIES-1, 0) != pdPASS){
-    	PRINTF("Failed to create TK1_Motor_Taskk\r\n");
+    	DPRINTF("Failed to create TK1_Motor_Taskk\r\n");
     	while(1);
     }
 
     if (xTaskCreate(TK1_Ninedof_Task, "TK1_Ninedof_Task", 1024, NULL, configMAX_PRIORITIES-1, 0) != pdPASS){
-    	PRINTF("Failed to create TK1_Ninedof_Task\r\n");
+    	DPRINTF("Failed to create TK1_Ninedof_Task\r\n");
     	while(1);
     }
 
     /* Tests */
-#ifdef MOTOR_TEST
+#if MOTOR_TEST
     if (xTaskCreate(Motor_Test_Task, "Motor_Test_Task", 1024, NULL, configMAX_PRIORITIES-1, 0) != pdPASS){
-    	PRINTF("Failed to create Motor_Test_Task\r\n");
+    	DPRINTF("Failed to create Motor_Test_Task\r\n");
     	while(1);
     }
 #endif
 
     vTaskStartScheduler();
-    while(1);
+    while(1) __asm("nop");
 }
 
 
