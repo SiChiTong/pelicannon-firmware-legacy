@@ -26,8 +26,8 @@
  * @usage Called by FreeRTOS after xTaskCreate
  * @param pvParam Unused
  */
-void Motor_Test_Task(void* pvParam){
-	for(;;){
+void Motor_Test_Task(void* pvParam) {
+	for(;;) {
 		DualHBridge_Step(DUALHBRIDGE_STEPS_PER_ROTATION);
 		vTaskDelay(2000 / portTICK_PERIOD_MS);
 		DualHBridge_Step(-DUALHBRIDGE_STEPS_PER_ROTATION);

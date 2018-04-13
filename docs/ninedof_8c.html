@@ -401,7 +401,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">= {</div><div class="line">    </div><div class="line">    {FXAS21002_CTRL_REG1, FXAS21002_CTRL_REG1_DR_100HZ, FXAS21002_CTRL_REG1_DR_MASK},</div><div class="line">    </div><div class="line">    {FXAS21002_CTRL_REG2, FXAS21002_CTRL_REG2_IPOL_ACTIVE_HIGH | FXAS21002_CTRL_REG2_INT_EN_DRDY_ENABLE |</div><div class="line">                              FXAS21002_CTRL_REG2_INT_CFG_DRDY_INT1,</div><div class="line">     FXAS21002_CTRL_REG2_IPOL_MASK | FXAS21002_CTRL_REG2_INT_EN_DRDY_MASK | FXAS21002_CTRL_REG2_INT_CFG_DRDY_MASK},</div><div class="line">    __END_WRITE_DATA__}</div></div><!-- fragment -->
+<b>Initial value:</b><div class="fragment"><div class="line">= {</div><div class="line">        </div><div class="line">        { FXAS21002_CTRL_REG1, FXAS21002_CTRL_REG1_DR_100HZ,</div><div class="line">                FXAS21002_CTRL_REG1_DR_MASK },</div><div class="line">        </div><div class="line">        { FXAS21002_CTRL_REG2, FXAS21002_CTRL_REG2_IPOL_ACTIVE_HIGH</div><div class="line">                | FXAS21002_CTRL_REG2_INT_EN_DRDY_ENABLE |</div><div class="line">                FXAS21002_CTRL_REG2_INT_CFG_DRDY_INT1,</div><div class="line">        FXAS21002_CTRL_REG2_IPOL_MASK | FXAS21002_CTRL_REG2_INT_EN_DRDY_MASK</div><div class="line">                | FXAS21002_CTRL_REG2_INT_CFG_DRDY_MASK },</div><div class="line">        __END_WRITE_DATA__ }</div></div><!-- fragment -->
 <p>FXAS21002 Initialization Registers. </p>
 
 </div>
@@ -417,7 +417,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">= {</div><div class="line">    {.readFrom = FXAS21002_OUT_X_MSB, .numBytes = <a class="code" href="ninedof_8c.html#a5d07ae78e2807b8b950eb2d2b0d1158b">G_DATA_READ_SIZE</a>}, __END_READ_DATA__}</div><div class="ttc" id="ninedof_8c_html_a5d07ae78e2807b8b950eb2d2b0d1158b"><div class="ttname"><a href="ninedof_8c.html#a5d07ae78e2807b8b950eb2d2b0d1158b">G_DATA_READ_SIZE</a></div><div class="ttdeci">#define G_DATA_READ_SIZE</div><div class="ttdef"><b>Definition:</b> ninedof.c:86</div></div>
+<b>Initial value:</b><div class="fragment"><div class="line">= { { .readFrom = FXAS21002_OUT_X_MSB,</div><div class="line">        .numBytes = <a class="code" href="ninedof_8c.html#a5d07ae78e2807b8b950eb2d2b0d1158b">G_DATA_READ_SIZE</a> }, __END_READ_DATA__ }</div><div class="ttc" id="ninedof_8c_html_a5d07ae78e2807b8b950eb2d2b0d1158b"><div class="ttname"><a href="ninedof_8c.html#a5d07ae78e2807b8b950eb2d2b0d1158b">G_DATA_READ_SIZE</a></div><div class="ttdeci">#define G_DATA_READ_SIZE</div><div class="ttdef"><b>Definition:</b> ninedof.c:95</div></div>
 </div><!-- fragment -->
 <p>FXAS21002 I2C Read Sequence. </p>
 
@@ -434,7 +434,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">= {</div><div class="line">  {.readFrom = FXAS21002_STATUS, .numBytes = 1}, __END_READ_DATA__}</div></div><!-- fragment -->
+<b>Initial value:</b><div class="fragment"><div class="line">= { { .readFrom = FXAS21002_STATUS,</div><div class="line">        .numBytes = 1 }, __END_READ_DATA__ }</div></div><!-- fragment -->
 <p>FXAS21002 I2C Status Sequence. </p>
 
 </div>
@@ -474,7 +474,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">= {</div><div class="line">    </div><div class="line">    </div><div class="line">    {FXOS8700_CTRL_REG1, FXOS8700_CTRL_REG1_DR_HYBRID_100_HZ, FXOS8700_CTRL_REG1_DR_MASK},</div><div class="line">    {FXOS8700_CTRL_REG3, FXOS8700_CTRL_REG3_IPOL_ACTIVE_HIGH | FXOS8700_CTRL_REG3_PP_OD_PUSH_PULL,</div><div class="line">     FXOS8700_CTRL_REG3_IPOL_MASK | FXOS8700_CTRL_REG3_PP_OD_MASK}, </div><div class="line">    {FXOS8700_CTRL_REG4, FXOS8700_CTRL_REG4_INT_EN_DRDY_EN,</div><div class="line">     FXOS8700_CTRL_REG4_INT_EN_DRDY_MASK}, </div><div class="line">    {FXOS8700_CTRL_REG5, FXOS8700_CTRL_REG5_INT_CFG_DRDY_INT2, FXOS8700_CTRL_REG5_INT_CFG_DRDY_MASK}, </div><div class="line">    {FXOS8700_M_CTRL_REG1, FXOS8700_M_CTRL_REG1_M_HMS_HYBRID_MODE, FXOS8700_M_CTRL_REG1_M_HMS_MASK},</div><div class="line">    {FXOS8700_M_CTRL_REG2, FXOS8700_M_CTRL_REG2_M_AUTOINC_HYBRID_MODE, FXOS8700_M_CTRL_REG2_M_AUTOINC_MASK},</div><div class="line">    __END_WRITE_DATA__}</div></div><!-- fragment -->
+<b>Initial value:</b><div class="fragment"><div class="line">= {</div><div class="line"></div><div class="line"></div><div class="line">{ FXOS8700_CTRL_REG1, FXOS8700_CTRL_REG1_DR_HYBRID_100_HZ,</div><div class="line">        FXOS8700_CTRL_REG1_DR_MASK },</div><div class="line">        { FXOS8700_CTRL_REG3, FXOS8700_CTRL_REG3_IPOL_ACTIVE_HIGH</div><div class="line">                | FXOS8700_CTRL_REG3_PP_OD_PUSH_PULL,</div><div class="line">        FXOS8700_CTRL_REG3_IPOL_MASK | FXOS8700_CTRL_REG3_PP_OD_MASK }, </div><div class="line">        { FXOS8700_CTRL_REG4, FXOS8700_CTRL_REG4_INT_EN_DRDY_EN,</div><div class="line">        FXOS8700_CTRL_REG4_INT_EN_DRDY_MASK }, </div><div class="line">        { FXOS8700_CTRL_REG5, FXOS8700_CTRL_REG5_INT_CFG_DRDY_INT2,</div><div class="line">                FXOS8700_CTRL_REG5_INT_CFG_DRDY_MASK }, </div><div class="line">        { FXOS8700_M_CTRL_REG1, FXOS8700_M_CTRL_REG1_M_HMS_HYBRID_MODE,</div><div class="line">                FXOS8700_M_CTRL_REG1_M_HMS_MASK }, { FXOS8700_M_CTRL_REG2,</div><div class="line">                FXOS8700_M_CTRL_REG2_M_AUTOINC_HYBRID_MODE,</div><div class="line">                FXOS8700_M_CTRL_REG2_M_AUTOINC_MASK },</div><div class="line">        __END_WRITE_DATA__ }</div></div><!-- fragment -->
 <p>FXOS8700 Initialization Registers. </p>
 
 </div>
@@ -490,7 +490,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">= {{.readFrom = FXOS8700_OUT_X_MSB, .numBytes = <a class="code" href="ninedof_8c.html#a4618cc436887c5a0ca6be5219af2fb7e">XM_DATA_READ_SIZE</a>},</div><div class="line">                                                  __END_READ_DATA__}</div><div class="ttc" id="ninedof_8c_html_a4618cc436887c5a0ca6be5219af2fb7e"><div class="ttname"><a href="ninedof_8c.html#a4618cc436887c5a0ca6be5219af2fb7e">XM_DATA_READ_SIZE</a></div><div class="ttdeci">#define XM_DATA_READ_SIZE</div><div class="ttdef"><b>Definition:</b> ninedof.c:81</div></div>
+<b>Initial value:</b><div class="fragment"><div class="line">= { { .readFrom = FXOS8700_OUT_X_MSB,</div><div class="line">        .numBytes = <a class="code" href="ninedof_8c.html#a4618cc436887c5a0ca6be5219af2fb7e">XM_DATA_READ_SIZE</a> },</div><div class="line">__END_READ_DATA__ }</div><div class="ttc" id="ninedof_8c_html_a4618cc436887c5a0ca6be5219af2fb7e"><div class="ttname"><a href="ninedof_8c.html#a4618cc436887c5a0ca6be5219af2fb7e">XM_DATA_READ_SIZE</a></div><div class="ttdeci">#define XM_DATA_READ_SIZE</div><div class="ttdef"><b>Definition:</b> ninedof.c:89</div></div>
 </div><!-- fragment -->
 <p>FXOS8700 I2C Read Sequence. </p>
 

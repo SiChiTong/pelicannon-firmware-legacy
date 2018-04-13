@@ -97,7 +97,7 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a776b8a9d48d9851898e95b995e2099b6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="pelicannon-k66f-firmware_8c.html#a776b8a9d48d9851898e95b995e2099b6">application_assert</a> (int boolean_expression)</td></tr>
-<tr class="memdesc:a776b8a9d48d9851898e95b995e2099b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Common point of assertation for debug purposes  Can be called by any task.  <a href="#a776b8a9d48d9851898e95b995e2099b6">More...</a><br /></td></tr>
+<tr class="memdesc:a776b8a9d48d9851898e95b995e2099b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Common point of assertion for debug purposes  Can be called by any task.  <a href="#a776b8a9d48d9851898e95b995e2099b6">More...</a><br /></td></tr>
 <tr class="separator:a776b8a9d48d9851898e95b995e2099b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a840291bc02cba5474a4cb46a9b9566fe"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="pelicannon-k66f-firmware_8c.html#a840291bc02cba5474a4cb46a9b9566fe">main</a> (void)</td></tr>
 <tr class="memdesc:a840291bc02cba5474a4cb46a9b9566fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Muxes pins, initializes hardware, and starts tasks.  <a href="#a840291bc02cba5474a4cb46a9b9566fe">More...</a><br /></td></tr>
@@ -122,10 +122,10 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Common point of assertation for debug purposes  Can be called by any task. </p>
+<p>Common point of assertion for debug purposes  Can be called by any task. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">boolean_expression</td><td>A boolean expression which resolves either to zero or a nonzero number If boolean_expression is zero, the application either loops forever in development mode or resets in production mode </td></tr>
+    <tr><td class="paramname">boolean_expression</td><td>A boolean expression to test If boolean_expression is false, the application either loops forever in development mode or resets in production mode </td></tr>
   </table>
   </dd>
 </dl>

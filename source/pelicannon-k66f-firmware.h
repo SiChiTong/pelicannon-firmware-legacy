@@ -53,7 +53,20 @@ void application_assert(int);
 inline void application_assert(int);
 #endif
 
-#define ASSERT(x) application_assert(x)
-
+#define ASSERT(x) application_assert((x))
+/**
+ * @brief	If the assertion is false, display a message and call the application assert handler
+ */
+#define ASSERT_MSG(condition, message) if(!(condition)){\
+	DPRINTF(message);\
+	ASSERT(0);\
+	}
+/**
+ * @brief	If the assertion is not false, display a message and call the application assert handler
+ */
+#define ASSERT_NOT_MSG(condition, message) if((condition)){\
+	DPRINTF(message);\
+	ASSERT(0);\
+	}
 
 #endif /* PELICANNON_K66F_FIRMWARE_H_ */

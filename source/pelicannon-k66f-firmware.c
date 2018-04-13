@@ -27,7 +27,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 /**
  * @file    pelicannon-k66f-firmware.c
  * @brief   Application entry point.
@@ -56,20 +56,21 @@
 #include "tests.h"
 
 /**
- * @brief Common point of assertation for debug purposes
+ * @brief Common point of assertion for debug purposes
  * @usage Can be called by any task
- * @param boolean_expression A boolean expression which resolves either to zero or a nonzero number
- * If boolean_expression is zero, the application either loops forever in development mode or resets in production mode
+ * @param boolean_expression A boolean expression to test
+ * If boolean_expression is false, the application either loops forever in development mode or resets in production mode
  */
 #if DEVELOPMENT
-void application_assert(int boolean_expression){
+void application_assert(int boolean_expression) {
 #else
-inline void application_assert(int boolean_expression){
+	inline void application_assert(int boolean_expression) {
 #endif
-	if (!boolean_expression){
+	if (!boolean_expression) {
 #ifdef DEVELOPMENT
-		DPRINTF("Assertation Failed!\r\n");
-		for(;;) __asm("nop");
+		DPRINTF("Assertion Failed!\r\n");
+		for (;;)
+			__asm("nop");
 #else
 		NVIC_SystemReset();
 #endif
@@ -81,62 +82,63 @@ inline void application_assert(int boolean_expression){
  */
 int main(void) {
 
-  	/* Init board hardware. */
-    BOARD_InitBootPins();
-    BOARD_InitBootClocks();
-    BOARD_InitBootPeripherals();
+	BaseType_t status;
+
+	/* Init board hardware. */
+	BOARD_InitBootPins();
+	BOARD_InitBootClocks();
+	BOARD_InitBootPeripherals();
 
 #ifdef DEVELOPMENT
-  	/* Init FSL debug console. */
-    DebugUART_InitPins();
-    BOARD_InitDebugConsole();
+	/* Init FSL debug console. */
+	DebugUART_InitPins();
+	BOARD_InitDebugConsole();
 #endif
 
 	NineDoF_InitPins();
 	JetsonTK1_InitPins();
 	DualHBridge_InitPins();
 
-    /* Lower GPIO Port ISR priorities to minimum level below FreeRTOS task level */
-    NVIC_SetPriority(PORTA_IRQn, 0x02);
-    NVIC_SetPriority(PORTC_IRQn, 0x02);
-    NVIC_SetPriority(TK1_UART_IRQn, 0x02);
+	/* Lower GPIO Port ISR priorities to minimum level below FreeRTOS task level */
+	NVIC_SetPriority(PORTA_IRQn, 0x02);
+	NVIC_SetPriority(PORTC_IRQn, 0x02);
+	NVIC_SetPriority(TK1_UART_IRQn, 0x02);
 
-    /* Initialize functionality groups before starting tasks to avoid race conditions */
-    NineDoF_Init();
-    DualHBridge_Init();
-    TK1_Init();
+	/* Initialize functionality groups before starting tasks to avoid race conditions */
+	NineDoF_Init();
+	DualHBridge_Init();
+	TK1_Init();
 
-    /* Create tasks */
-    if (xTaskCreate(Ninedof_Task, "Ninedof_Task", 1024, NULL, configMAX_PRIORITIES-1, 0) != pdPASS){
-    	DPRINTF("Failed to create Ninedof_Task\r\n");
-    	while(1);
-    }
+	/* Create tasks */
+	status = xTaskCreate(Ninedof_Task, "Ninedof_Task", 1024, NULL,
+			configMAX_PRIORITIES - 1, 0);
+	ASSERT_NOT_MSG(status != pdPASS,
+			"Failed to create Ninedof_Task\r\n");
 
-    if (xTaskCreate(DualHBridge_Task, "DualHBridge_Task", 1024, NULL, configMAX_PRIORITIES-2, 0) != pdPASS){
-    	DPRINTF("Failed to create DualHBridge_Task\r\n");
-    	while(1);
-    }
+	status = xTaskCreate(DualHBridge_Task, "DualHBridge_Task", 1024, NULL,
+			configMAX_PRIORITIES - 2, 0);
+	ASSERT_NOT_MSG(status != pdPASS,
+			"Failed to create DualHBridge_Task\r\n");
 
-    if (xTaskCreate(TK1_Motor_Task, "TK1_Motor_Task", 1024, NULL, configMAX_PRIORITIES-1, 0) != pdPASS){
-    	DPRINTF("Failed to create TK1_Motor_Taskk\r\n");
-    	while(1);
-    }
+	status = xTaskCreate(TK1_Motor_Task, "TK1_Motor_Task", 1024, NULL,
+			configMAX_PRIORITIES - 1, 0);
+	ASSERT_NOT_MSG(status != pdPASS,
+			"Failed to create TK1_Motor_Taskk\r\n");
 
-    if (xTaskCreate(TK1_Ninedof_Task, "TK1_Ninedof_Task", 1024, NULL, configMAX_PRIORITIES-1, 0) != pdPASS){
-    	DPRINTF("Failed to create TK1_Ninedof_Task\r\n");
-    	while(1);
-    }
+	status = xTaskCreate(TK1_Ninedof_Task, "TK1_Ninedof_Task", 1024, NULL,
+			configMAX_PRIORITIES - 1, 0);
+	ASSERT_NOT_MSG(status != pdPASS,
+			"Failed to create TK1_Ninedof_Task\r\n");
 
-    /* Tests */
+	/* Tests */
 #if MOTOR_TEST
-    if (xTaskCreate(Motor_Test_Task, "Motor_Test_Task", 1024, NULL, configMAX_PRIORITIES-1, 0) != pdPASS){
-    	DPRINTF("Failed to create Motor_Test_Task\r\n");
-    	while(1);
-    }
+	status = xTaskCreate(Motor_Test_Task, "Motor_Test_Task", 1024, NULL, configMAX_PRIORITIES-1, 0)
+	ASSERT_NOT_MSG(status != pdPASS,
+			"Failed to create Motor_Test_Task\r\n");
 #endif
 
-    vTaskStartScheduler();
-    while(1) __asm("nop");
+	vTaskStartScheduler();
+	while (1)
+		__asm("nop");
 }
-
 
