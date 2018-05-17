@@ -92,6 +92,13 @@ int DualHBridge_StepsLeft() {
 void DualHBridge_Step(int steps) {
 	xSemaphoreTake(dualhbridge_data_mutex, portMAX_DELAY);
 	dualhbridge_target_steps += steps;
+
+	if (dualhbridge_target_steps > STEPPER_GUARD){
+		dualhbridge_target_steps = STEPPER_GUARD;
+	}else if(dualhbridge_target_steps < -STEPPER_GUARD){
+		dualhbridge_target_steps = -STEPPER_GUARD;
+	}
+
 	xSemaphoreGive(dualhbridge_data_mutex);
 
 	xEventGroupSetBits(dualhbridge_event_group, DUALHBRIDGE_EVENT_WAKEUP);

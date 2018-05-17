@@ -132,9 +132,8 @@ int main(void) {
 
 	/* Tests */
 #if MOTOR_TEST
-	status = xTaskCreate(Motor_Test_Task, "Motor_Test_Task", 1024, NULL, configMAX_PRIORITIES-1, 0)
-	ASSERT_NOT_MSG(status != pdPASS,
-			"Failed to create Motor_Test_Task\r\n");
+	status = xTaskCreate(Motor_Test_Task, "Motor_Test_Task", 1024, NULL, configMAX_PRIORITIES-1, 0);
+	ASSERT_NOT_MSG(status != pdPASS, "Failed to create Motor_Test_Task\r\n");
 #endif
 
 	vTaskStartScheduler();

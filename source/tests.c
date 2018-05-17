@@ -28,9 +28,9 @@
  */
 void Motor_Test_Task(void* pvParam) {
 	for(;;) {
-		DualHBridge_Step(DUALHBRIDGE_STEPS_PER_ROTATION);
+		DualHBridge_Step(STEPPER_MOTOR_STEPS_PER_ROTATION / 6);
 		vTaskDelay(2000 / portTICK_PERIOD_MS);
-		DualHBridge_Step(-DUALHBRIDGE_STEPS_PER_ROTATION);
+		DualHBridge_Step(-STEPPER_MOTOR_STEPS_PER_ROTATION / 6);
 		vTaskDelay(2000 / portTICK_PERIOD_MS);
 	}
 }
