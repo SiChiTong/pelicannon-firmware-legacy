@@ -34,7 +34,7 @@
  */
 #define STEPPER_MOTOR_STEPS_PER_ROTATION 200
 /*! @brief	Speed at which the stepper motor is driven in rotations per minute*/
-#define STEPPER_MOTOR_RPM 60 / 4
+#define STEPPER_MOTOR_RPM 60 / 8
 
 /*! @brief   Maximum steps to take in either direction */
 #define STEPPER_GUARD 45

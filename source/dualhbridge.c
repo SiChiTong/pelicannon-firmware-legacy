@@ -91,12 +91,13 @@ int DualHBridge_StepsLeft() {
  */
 void DualHBridge_Step(int steps) {
 	xSemaphoreTake(dualhbridge_data_mutex, portMAX_DELAY);
+	dualhbridge_target_steps = dualhbridge_current_steps;
 	dualhbridge_target_steps += steps;
 
 	if (dualhbridge_target_steps > STEPPER_GUARD){
 		dualhbridge_target_steps = STEPPER_GUARD;
-	}else if(dualhbridge_target_steps < -STEPPER_GUARD){
-		dualhbridge_target_steps = -STEPPER_GUARD;
+	}else if(dualhbridge_target_steps < -1*STEPPER_GUARD){
+		dualhbridge_target_steps = -1*STEPPER_GUARD;
 	}
 
 	xSemaphoreGive(dualhbridge_data_mutex);
@@ -227,6 +228,9 @@ void DualHBridge_Task(void *pvParameters) {
 					break;
 				}
 				xSemaphoreGive(dualhbridge_data_mutex);
+
+				if(dualhbridge_target_steps == dualhbridge_current_steps)
+					break;
 
 				//Delay till next step
 				event_set = xEventGroupWaitBits(dualhbridge_event_group,
